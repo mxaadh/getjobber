@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ServiceRequestController;
+use App\Http\Controllers\QuoteController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -15,6 +17,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('users', UserController::class);
     Route::resource('clients', ClientController::class);
+    Route::resource('requests', ServiceRequestController::class);
+    Route::resource('/quotes', QuoteController::class);
+
 });
 
 require __DIR__.'/settings.php';

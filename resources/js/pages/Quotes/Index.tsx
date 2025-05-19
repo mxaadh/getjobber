@@ -1,6 +1,5 @@
 import React from 'react';
-import { Head, useForm } from '@inertiajs/react';
-import { Input } from "@/components/ui/input";
+import { Head } from '@inertiajs/react';
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -20,7 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({ clients }) {
+export default function Index({ quotes }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Clients" />
@@ -37,24 +36,24 @@ export default function Index({ clients }) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {clients.map((client) => (
-                            <TableRow key={client.id}>
-                                <TableCell>{client.first_name}</TableCell>
-                                <TableCell>{client.last_name}</TableCell>
-                                <TableCell>{client.company_name}</TableCell>
-                                <TableCell>{client.phone}</TableCell>
-                                <TableCell>{client.email}</TableCell>
+                        {quotes.map((quote) => (
+                            <TableRow key={quote.id}>
+                                <TableCell>{quote.first_name}</TableCell>
+                                <TableCell>{quote.last_name}</TableCell>
+                                <TableCell>{quote.company_name}</TableCell>
+                                <TableCell>{quote.phone}</TableCell>
+                                <TableCell>{quote.email}</TableCell>
                                 <TableCell className="text-right space-x-2">
                                     <Button variant="outline" asChild>
-                                        <a href={`/clients/${client.id}/edit`}>Edit</a>
+                                        <a href={`/quotes/${quote.id}/edit`}>Edit</a>
                                     </Button>
                                     <form
                                         method="POST"
-                                        action={`/clients/${client.id}`}
+                                        action={`/quotes/${quote.id}`}
                                         onSubmit={(e) => {
                                             e.preventDefault();
                                             if (confirm("Are you sure?")) {
-                                                Inertia.delete(`/clients/${client.id}`);
+                                                Inertia.delete(`/quotes/${quote.id}`);
                                             }
                                         }}
                                         className="inline"
@@ -70,5 +69,5 @@ export default function Index({ clients }) {
                 </Table>
             </div>
         </AppLayout>
-);
+    );
 }

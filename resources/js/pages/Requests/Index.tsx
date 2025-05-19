@@ -1,6 +1,5 @@
 import React from 'react';
-import { Head, useForm } from '@inertiajs/react';
-import { Input } from "@/components/ui/input";
+import { Head } from '@inertiajs/react';
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -15,46 +14,51 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Clients',
-        href: '/clients',
+        title: 'Requests',
+        href: '/requests',
     },
 ];
 
-export default function Index({ clients }) {
+export default function Index({ requests }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Clients" />
+            <Head title="Requests" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                <Button asChild>
+                    <a href={`/requests/create`}>Add Request</a>
+                </Button>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>First Name</TableHead>
-                            <TableHead>Last Name</TableHead>
-                            <TableHead>Company Name</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Email</TableHead>
+                            <TableHead>Client</TableHead>
+                            <TableHead>Title</TableHead>
+                            <TableHead>Property</TableHead>
+                            <TableHead>Contact</TableHead>
+                            <TableHead>Requested</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {clients.map((client) => (
-                            <TableRow key={client.id}>
-                                <TableCell>{client.first_name}</TableCell>
-                                <TableCell>{client.last_name}</TableCell>
-                                <TableCell>{client.company_name}</TableCell>
-                                <TableCell>{client.phone}</TableCell>
-                                <TableCell>{client.email}</TableCell>
+                        {requests.map((request) => (
+                            <TableRow key={request.id}>
+                                <TableCell>{request.client_name}</TableCell>
+                                <TableCell>{request.title}</TableCell>                                <TableCell>{request.client_name}</TableCell>
+                                <TableCell>{request.property}</TableCell>                                <TableCell>{request.client_name}</TableCell>
+                                <TableCell>{request.contact}</TableCell>
+                                <TableCell>{request.requested}</TableCell>
+                                <TableCell>{request.status}</TableCell>
                                 <TableCell className="text-right space-x-2">
                                     <Button variant="outline" asChild>
-                                        <a href={`/clients/${client.id}/edit`}>Edit</a>
+                                        <a href={`/requests/${request.id}/edit`}>Edit</a>
                                     </Button>
                                     <form
                                         method="POST"
-                                        action={`/clients/${client.id}`}
+                                        action={`/requests/${request.id}`}
                                         onSubmit={(e) => {
                                             e.preventDefault();
                                             if (confirm("Are you sure?")) {
-                                                Inertia.delete(`/clients/${client.id}`);
+                                                Inertia.delete(`/requests/${request.id}`);
                                             }
                                         }}
                                         className="inline"
@@ -70,5 +74,5 @@ export default function Index({ clients }) {
                 </Table>
             </div>
         </AppLayout>
-);
+    );
 }

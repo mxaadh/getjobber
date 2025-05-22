@@ -17,10 +17,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('users', UserController::class);
     Route::resource('clients', ClientController::class);
-    Route::resource('requests', ServiceRequestController::class);
-    Route::resource('/quotes', QuoteController::class);
-
+    Route::resource('bookings', ServiceRequestController::class);
+    Route::post('bookings/quote-add', [ServiceRequestController::class, 'quoteAdd'])->name('bookings.quote-add');
+    Route::resource('quotes', QuoteController::class);
 });
+
+Route::get('/quotes/{quote}/approve/{token}', [ServiceRequestController::class, 'approve'])
+    ->name('quotes.approve');
+Route::get('/quotes/{quote}/reject/{token}', [ServiceRequestController::class, 'reject'])
+    ->name('quotes.reject');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

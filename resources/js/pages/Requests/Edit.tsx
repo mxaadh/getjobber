@@ -15,13 +15,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function Create({clients}: { clients: any[] }) {
+export default function Edit({clients, request}: { clients: any[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={'Create Request'} />
+            <Head title={'Update Request'} />
             <div className="space-y-6 m-2 p-2">
-                <PageHeadingButtons heading={'Add New Booking'} />
-                <BookingForm clients={clients}/>
+                <PageHeadingButtons heading={'Update Booking'} />
+                <BookingForm clients={clients} edit={request}/>
             </div>
         </AppLayout>
     );

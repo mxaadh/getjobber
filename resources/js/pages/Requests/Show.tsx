@@ -21,7 +21,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function show({request, quotes, approvedQuotes}: { request: any }) {
-
     const {email, full_name} = request.client;
     const { data, setData, post, reset } = useForm({
         service_request_id: request.id,

@@ -26,6 +26,7 @@ export default function Index({ users }) {
         name: '',
         email: '',
         password: '',
+        role: '',
     });
 
     const handleSubmit = (e) => {
@@ -58,7 +59,7 @@ export default function Index({ users }) {
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
                     />
-                    <Select>
+                    <Select onValueChange={(value) => setData('role', value)}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Role" />
                         </SelectTrigger>
@@ -66,7 +67,6 @@ export default function Index({ users }) {
                             <SelectItem value="admin">Admin</SelectItem>
                             <SelectItem value="employee">Employee</SelectItem>
                             <SelectItem value="contractor">Contractor</SelectItem>
-                            <SelectItem value="customer">Customer</SelectItem>
                         </SelectContent>
                     </Select>
 
@@ -78,6 +78,7 @@ export default function Index({ users }) {
                         <TableRow>
                             <TableHead>Name</TableHead>
                             <TableHead>Email</TableHead>
+                            <TableHead>Role</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -86,6 +87,7 @@ export default function Index({ users }) {
                             <TableRow key={user.id}>
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>{user.email}</TableCell>
+                                <TableCell>{user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()}</TableCell>
                                 <TableCell className="text-right space-x-2">
                                     <Button variant="outline" asChild>
                                         <a href={`/users/${user.id}/edit`}>Edit</a>

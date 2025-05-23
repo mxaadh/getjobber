@@ -40,11 +40,12 @@ export default function Welcome() {
                         )}
                     </nav>
                 </header>
-                {
-                    auth.user
-                    ? <BookingForm title={"Booking Request"}/>
-                    : <Testimonials />
-                }
+                {/*{*/}
+                {/*    auth.user*/}
+                {/*    ? <BookingForm title={"Booking Request"}/>*/}
+                {/*    : */}
+                <Testimonials />
+                {/*}*/}
                 <div className="hidden h-14.5 lg:block"></div>
             </div>
         </>

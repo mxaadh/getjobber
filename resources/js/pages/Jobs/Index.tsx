@@ -1,10 +1,30 @@
 import { Head, Link } from '@inertiajs/react';
 import PageHeadingButtons from '@/components/page-heading-buttons';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Edit, EyeIcon, Filter, Plus, Search, Trash } from 'lucide-react';
 import React from 'react';
 import type { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
+import StatsOverview from '@/components/StatsOverview';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { format } from 'date-fns';
+import {
+    Pagination,
+    PaginationContent, PaginationEllipsis,
+    PaginationItem,
+    PaginationLink, PaginationNext,
+    PaginationPrevious
+} from '@/components/ui/pagination';
+import { StatusBadge } from '@/pages/Requests';
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,7 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function Index() {
+export default function Index({ jobs, all_count, month_count, week_count }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Requests" />
@@ -26,6 +46,159 @@ export default function Index() {
                         </Link>
                     </Button>
                 </PageHeadingButtons>
+
+                <StatsOverview title={'Jobs'} week={week_count} month={month_count}
+                               all={all_count} />
+
+                {/* Clients table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>All Bookings</CardTitle>
+                        <CardDescription>{all_count} results</CardDescription>
+                        {/* Filters and Search */}
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="flex gap-2">
+                                            <Filter className="h-4 w-4" />
+                                            Status
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56">
+                                        <DropdownMenuCheckboxItem checked>
+                                            All
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Pending
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Active
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Approved
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Rejected
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Completed
+                                        </DropdownMenuCheckboxItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <div className="relative w-full md:w-64">
+                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search Bookings..."
+                                    className="pl-9"
+                                />
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Property</TableHead>
+                                    <TableHead>Job ID</TableHead>
+                                    <TableHead>Schedule</TableHead>
+                                    <TableHead>Total Price</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {jobs.map((job) => (
+                                    <TableRow key={job.id}>
+                                        <TableCell>{job.client.full_name}</TableCell>
+                                        <TableCell>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="link"
+                                                        className="p-0 h-auto text-left font-normal"
+                                                    >
+        <span className="inline-block truncate max-w-[200px]">
+          {job.client.address.split(',')[0]} {/* Show just first line */}
+        </span>
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-[280px]">
+                                                    <div className="grid gap-2">
+                                                        <div className="space-y-1">
+                                                            <h4 className="text-sm font-medium">Full Address</h4>
+                                                            <p className="text-sm">{job.client.address}</p>
+                                                        </div>
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </TableCell>
+                                        <TableCell>#{job.id}</TableCell>
+                                        {/*<TableCell>{job.arrival_times}</TableCell>*/}
+                                        <TableCell>{format(new Date(job.schedule_date), 'dd/MM/yyyy')}</TableCell>
+                                        <TableCell>{job.total_price}</TableCell>
+                                        <TableCell><StatusBadge status={job.status} /></TableCell>
+                                        <TableCell className="text-right space-x-2">
+                                            <Button size={'icon'} variant={'ghost'}>
+                                                <Link href={`/jobs/${job.id}`}>
+                                                    <EyeIcon className={'text-green-800'} />
+                                                </Link>
+                                            </Button>
+                                            <Button variant="ghost">
+                                                <Link href={`/jobs/${job.id}/edit`}>
+                                                    <Edit className={'text-yellow-800'} />
+                                                </Link>
+                                            </Button>
+                                            <form
+                                                method="POST"
+                                                action={`/jobs/${job.id}`}
+                                                onSubmit={(e) => {
+                                                    e.preventDefault();
+                                                    if (confirm('Are you sure?')) {
+                                                        Inertia.delete(`/bookings/${job.id}`);
+                                                    }
+                                                }}
+                                                className="inline"
+                                            >
+                                                <Button size={'icon'} variant="ghost" type="submit">
+                                                    <Trash className={'text-red-800'} />
+                                                </Button>
+                                            </form>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter className={'items-end'}>
+                        <Pagination className={'justify-end'}>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious href="#" />
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink href="#">1</PaginationLink>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink href="#" isActive>
+                                        2
+                                    </PaginationLink>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink href="#">3</PaginationLink>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationEllipsis />
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationNext href="#" />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    </CardFooter>
+                </Card>
             </div>
         </AppLayout>
     );

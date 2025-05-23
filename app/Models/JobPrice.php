@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BookingQuote extends Model
+class JobPrice extends Model
 {
-    protected $table = 'booking_quotes';
+    protected $table = 'job_prices';
 
     protected $fillable = [
-        'booking_id',
-        'quote_amount',
+        'service_job_id',
+        'service_request_id',
+        'job_price',
         'is_approved',
         'approved_at',
         'is_rejected',
@@ -22,12 +23,16 @@ class BookingQuote extends Model
         'approved_at' => 'datetime',
         'is_rejected' => 'boolean',
         'rejected_at' => 'datetime',
-        'quote_amount' => 'decimal:2'
+        'job_price' => 'decimal:2'
     ];
 
-    public function booking()
+    public function ServiceJob()
     {
-        return $this->belongsTo(ServiceRequest::class, 'booking_id');
+        return $this->belongsTo(Job::class, 'service_job_id');
+    }
+    public function serviceRequest()
+    {
+        return $this->belongsTo(ServiceRequest::class);
     }
 
     // Helper method to approve the quote

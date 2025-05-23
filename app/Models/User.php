@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role'
+    ];
+
+    protected $casts = [
+        'role' => 'string',
     ];
 
     /**
@@ -44,5 +49,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Helper methods for checking roles
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isContractor(): bool
+    {
+        return $this->role === 'contractor';
+    }
+
+    public function isEmployee(): bool
+    {
+        return $this->role === 'employee';
     }
 }

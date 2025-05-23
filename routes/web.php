@@ -22,12 +22,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('bookings/quote-add', [ServiceRequestController::class, 'quoteAdd'])->name('bookings.quote-add');
 //    Route::resource('quotes', QuoteController::class);
     Route::resource('jobs', JobController::class);
+    Route::post('jobs/price-add', [JobController::class, 'priceAdd'])->name('jobs.price-add');
 });
 
 Route::get('/quotes/{quote}/approve/{token}', [ServiceRequestController::class, 'approve'])
     ->name('quotes.approve');
 Route::get('/quotes/{quote}/reject/{token}', [ServiceRequestController::class, 'reject'])
     ->name('quotes.reject');
+
+Route::get('/prices/{price}/approve/{token}', [JobController::class, 'approve'])
+    ->name('prices.approve');
+Route::get('/prices/{price}/reject/{token}', [JobController::class, 'reject'])
+    ->name('prices.reject');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

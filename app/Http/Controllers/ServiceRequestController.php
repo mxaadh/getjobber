@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\QuotationMail;
 use App\Models\BookingQuote;
 use App\Models\Client;
+use App\Models\Job;
 use App\Models\ServiceRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -178,6 +179,15 @@ class ServiceRequestController extends Controller
         }
 
         $quote->approve();
+        $data = [
+            'client_id' => $quote->booking->client_id,
+            'service_request_id' => $quote->booking_id,
+            'schedule_date' => $quote->booking->preferred_day,
+            'schedule_time' => '0:00',
+            'notes' => $quote->booking->details,
+            'total_price' => 0,
+        ];
+        Job::create($data);
 
         return view('quotes.response', [
             'message' => 'Quote approved successfully!',
@@ -207,7 +217,7 @@ class ServiceRequestController extends Controller
 
     protected function validateToken($quoteId, $action, $token)
     {
-        $validToken = hash_hmac('sha256', $quoteId.$action, config('app.key'));
+        $validToken = hash_hmac('sha256', $quoteId . $action, config('app.key'));
 
         if (!hash_equals($validToken, $token)) {
             abort(403, 'Invalid action token');

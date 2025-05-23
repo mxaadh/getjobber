@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserDetail;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
@@ -22,23 +23,37 @@ class UserController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        return Inertia::render('Users/Create');
+    }
+
     /**
      * Store a newly created user.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role'     => 'required|in:admin,contractor,employee',
+            'role' => 'required|in:admin,contractor,employee',
         ]);
 
-        User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role'     => $validated['role'],
+            'role' => $validated['role'],
+        ]);
+
+        // Optionally, you can create a user detail record here
+        UserDetail::create([
+            'user_id' => $user->id,
+            'phone' => $request->input('phone'),
+            'country' => $request->input('country'),
+            'state' => $request->input('state'),
+            'city' => $request->input('city'),
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
@@ -64,7 +79,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
-            'name'  => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
         ]);
 

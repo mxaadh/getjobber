@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Property;
+use App\Models\User;
+use App\Models\UserDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -66,6 +68,7 @@ class ClientController extends Controller
             'email' => $validated['email'],
         ]);
 
+        // Optionally, you can create a property record here
         Property::create([
             'client_id' => $client->id,
             'street1' => $validated['street1'],
@@ -74,6 +77,21 @@ class ClientController extends Controller
             'state' => $validated['state'],
             'postal_code' => $validated['postal_code'],
             'country' => $validated['country'],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email' => $validated['email'],
+            'password' => Hash::make('password'), // Default password
+            'role' => 'client',
+        ]);
+
+        UserDetail::create([
+            'user_id' => $user->id,
+            'phone' => $validated['phone'],
+            'country' => $validated['country'],
+            'state' => $validated['state'],
+            'city' => $validated['city'],
         ]);
 
         return redirect()->route('clients.index')->with('success', 'Client created successfully.');

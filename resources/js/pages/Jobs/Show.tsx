@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Timeline } from '@/components/timeline';
+import { Edit, GitCommitVertical, LocateIcon, PhoneCall } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -46,15 +48,38 @@ export function JobDetailsCard({ client, service_request }: { client: any, servi
             </CardHeader>
 
             <CardContent className="grid grid-cols-3 grid-rows-1 gap-4 space-y-4">
-                <div>
-                    <h3 className="font-medium text-lg mb-2">Property address</h3>
-                    <p className="text-sm">{client.address}</p>
+                <div className={'space-y-5'}>
+                    <div>
+                        <h3 className="font-medium text-lg mb-2 flex items-center gap-1"><LocateIcon /> Property address
+                        </h3>
+                        <p className="text-sm">{client.address}</p>
+                    </div>
+                    <div>
+                        <h3 className="font-medium text-lg mb-2 flex items-center gap-1"><GitCommitVertical /> Booking
+                            Status
+                        </h3>
+                        <Badge
+                            className="text-sm">{service_request.status.charAt(0).toUpperCase() + service_request.status.slice(1)}</Badge>
+                    </div>
                 </div>
 
-                <div>
-                    <h3 className="font-medium text-lg mb-2">Contact details</h3>
-                    <p className="text-sm">{client.phone}</p>
-                    <p className="text-sm">{client.email}</p>
+                <div className={'w-[280px]'}>
+                    <h3 className="font-medium text-lg mb-2 flex items-center gap-1"><PhoneCall /> Contact details</h3>
+
+                    <div className="space-y-4">
+                        <KeyValueList
+                            items={[
+                                {
+                                    key: 'Phone: ',
+                                    value: client.phone
+                                },
+                                {
+                                    key: 'Email: ',
+                                    value: client.email
+                                }
+                            ]}
+                        />
+                    </div>
                 </div>
 
                 <div>
@@ -63,6 +88,13 @@ export function JobDetailsCard({ client, service_request }: { client: any, servi
                         <KeyValueList
                             items={[
                                 {
+                                    key: 'Cleaning Services',
+                                    value: service_request.cleaning_services.map((service: any) => (
+                                        <Badge key={service} className="text-sm font-medium ml-2">
+                                            {service}
+                                        </Badge>
+                                    ))
+                                }, {
                                     key: 'Preferred Day',
                                     value: format(new Date(service_request.preferred_day), 'dd/MM/yyyy')
                                 },
@@ -72,7 +104,11 @@ export function JobDetailsCard({ client, service_request }: { client: any, servi
                                 },
                                 {
                                     key: 'Arrival Times',
-                                    value: service_request.arrival_times
+                                    value: service_request.arrival_times.map((service: any) => (
+                                        <Badge key={service} className="text-sm font-medium ml-2">
+                                            {service}
+                                        </Badge>
+                                    ))
                                 }
                             ]}
                         />
@@ -104,49 +140,58 @@ export default function show({ job, contractors, price }: { job: any, contractor
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Booking Details" />
             <div className="space-y-6 m-2 p-2">
-                <PageHeadingButtons heading={`Job Details`} />
+                <PageHeadingButtons heading={`Job Details`}>
+                    <Button>
+                        <Link href={`/jobs/${job.id}/edit`} className="flex items-center gap-1">
+                            <Edit />
+                            Edit
+                        </Link>
+                    </Button>
+                </PageHeadingButtons>
                 <JobDetailsCard client={job.client} service_request={job.service_request} />
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Send Quote to contractor</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto p-6">
-                            <Label htmlFor="quote-amount">Select Contractor</Label>
-                            <Select
-                                id="contractor"
-                                className="w-full border rounded-md p-2"
-                                onValueChange={(value) => setData('contractor_name', value)}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select a contractor" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {contractors.map((contractor) => (
-                                        <SelectItem key={contractor.id}
-                                                    value={contractor.id + ' - ' + contractor.name + ' - ' + contractor.email}>
-                                            {contractor.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Label htmlFor="quote-amount">Job amount</Label>
-                            <Input
-                                id="quote-amount"
-                                type={'text'}
-                                placeholder="Enter Job Amount"
-                                value={data.job_price}
-                                onChange={(e) => setData('job_price', e.target.value)}
-                            />
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline">
-                                    <Link href={'/bookings'}>Cancel</Link>
-                                </Button>
-                                <Button type={'submit'}>Send Email</Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-                <Timeline quotes={price} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Send Quote to contractor</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto p-6">
+                                <Label htmlFor="quote-amount">Select Contractor</Label>
+                                <Select
+                                    id="contractor"
+                                    className="w-full border rounded-md p-2"
+                                    onValueChange={(value) => setData('contractor_name', value)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select a contractor" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {contractors.map((contractor) => (
+                                            <SelectItem key={contractor.id}
+                                                        value={contractor.id + ' - ' + contractor.name + ' - ' + contractor.email}>
+                                                {contractor.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Label htmlFor="quote-amount">Job amount</Label>
+                                <Input
+                                    id="quote-amount"
+                                    type={'text'}
+                                    placeholder="Enter Job Amount"
+                                    value={data.job_price}
+                                    onChange={(e) => setData('job_price', e.target.value)}
+                                />
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="outline">
+                                        <Link href={'/bookings'}>Cancel</Link>
+                                    </Button>
+                                    <Button type={'submit'}>Send Email</Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+                    <Timeline quotes={price} />
+                </div>
             </div>
         </AppLayout>
     );

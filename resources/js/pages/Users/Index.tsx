@@ -1,24 +1,41 @@
 import React from 'react';
-import { Head, useForm } from '@inertiajs/react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
     Table,
     TableHeader,
     TableRow,
     TableHead,
     TableBody,
-    TableCell,
-} from "@/components/ui/table";
+    TableCell
+} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeadingButtons from '@/components/page-heading-buttons';
+import { Edit, Filter, Plus, Search, Trash } from 'lucide-react';
+import StatsOverview from '@/components/StatsOverview';
+import {
+    Pagination,
+    PaginationContent, PaginationEllipsis,
+    PaginationItem,
+    PaginationLink, PaginationNext,
+    PaginationPrevious
+} from '@/components/ui/pagination';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Users',
-        href: '/users',
-    },
+        href: '/users'
+    }
 ];
 
 export default function Index({ users }) {
@@ -26,93 +43,146 @@ export default function Index({ users }) {
         name: '',
         email: '',
         password: '',
-        role: '',
+        role: ''
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         post('/users', {
-            onSuccess: () => reset(),
+            onSuccess: () => reset()
         });
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                        type="text"
-                        placeholder="Name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                    />
-                    <Input
-                        type="email"
-                        placeholder="Email"
-                        value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
-                    <Input
-                        type="password"
-                        placeholder="Password"
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-                    <Select onValueChange={(value) => setData('role', value)}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="employee">Employee</SelectItem>
-                            <SelectItem value="contractor">Contractor</SelectItem>
-                        </SelectContent>
-                    </Select>
+            <div className="space-y-6 m-2 p-2">
+                <PageHeadingButtons heading={'Users'}>
+                    <Button>
+                        <Link href={`/users/create`} className="flex items-center gap-1">
+                            <Plus />
+                            New User
+                        </Link>
+                    </Button>
+                </PageHeadingButtons>
 
-                    <Button type="submit">Create User</Button>
-                </form>
+                <StatsOverview title={'Users'} />
 
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {users.map((user) => (
-                            <TableRow key={user.id}>
-                                <TableCell>{user.name}</TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()}</TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    <Button variant="outline" asChild>
-                                        <a href={`/users/${user.id}/edit`}>Edit</a>
-                                    </Button>
-                                    <form
-                                        method="POST"
-                                        action={`/users/${user.id}`}
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            if (confirm("Are you sure?")) {
-                                                Inertia.delete(`/users/${user.id}`);
-                                            }
-                                        }}
-                                        className="inline"
-                                    >
-                                        <Button variant="destructive" type="submit">
-                                            Delete
+                <Card>
+                    <CardHeader>
+                        <CardTitle>All Users</CardTitle>
+                        <CardDescription>{users.length} results</CardDescription>
+                        {/* Filters and Search */}
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="flex gap-2">
+                                            <Filter className="h-4 w-4" />
+                                            Role
                                         </Button>
-                                    </form>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56">
+                                        <DropdownMenuCheckboxItem checked>
+                                            All
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Admin
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Employee
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Contractor
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem>
+                                            Client
+                                        </DropdownMenuCheckboxItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <div className="relative w-full md:w-64">
+                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search Users..."
+                                    className="pl-9"
+                                />
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead>Address</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {users.map((user) => (
+                                    <TableRow key={user.id}>
+                                        <TableCell>{user.name}</TableCell>
+                                        <TableCell>{user.email}</TableCell>
+                                        <TableCell>{user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()}</TableCell>
+                                        <TableCell>{user.address}</TableCell>
+                                        <TableCell className="text-right space-x-2">
+                                            <Button variant="ghost">
+                                                <Link href={`/users/${user.id}/edit`}>
+                                                    <Edit className={'text-yellow-800'} />
+                                                </Link>
+                                            </Button>
+                                            <form
+                                                method="POST"
+                                                action={`/users/${user.id}`}
+                                                onSubmit={(e) => {
+                                                    e.preventDefault();
+                                                    if (confirm('Are you sure?')) {
+                                                        Inertia.delete(`/users/${user.id}`);
+                                                    }
+                                                }}
+                                                className="inline"
+                                            >
+                                                <Button size={'icon'} variant="ghost" type="submit">
+                                                    <Trash className={'text-red-800'} />
+                                                </Button>
+                                            </form>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter className={'items-end'}>
+                        <Pagination className={'justify-end'}>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious href="#" />
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink href="#">1</PaginationLink>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink href="#" isActive>
+                                        2
+                                    </PaginationLink>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink href="#">3</PaginationLink>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationEllipsis />
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationNext href="#" />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    </CardFooter>
+                </Card>
             </div>
         </AppLayout>
-);
+    );
 }

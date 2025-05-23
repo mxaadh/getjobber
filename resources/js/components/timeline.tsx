@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import { CircleSmall } from 'lucide-react';
 
 interface BookingQuote {
     id: number;
@@ -52,10 +53,10 @@ export function Timeline({ quotes }: TimelineProps) {
     return (
         <div className="space-y-8">
             {quotes.map((quote) => (
-                <div key={quote.id} className="flex items-start gap-4">
+                <div key={quote.id} className="flex items-start gap-4 ">
                     <div className="flex flex-col items-center">
                         <Avatar className="h-9 w-9">
-                            <AvatarFallback>Q{quote.id}</AvatarFallback>
+                            <AvatarFallback><CircleSmall /></AvatarFallback>
                         </Avatar>
                         <div className="w-px bg-gray-200 h-full mt-2" />
                     </div>
@@ -70,15 +71,19 @@ export function Timeline({ quotes }: TimelineProps) {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-3 gap-4 pt-4">
+                                <div className="grid grid-cols-4 gap-5 pt-4">
                                     <div>
                                         <p className="text-xs text-muted-foreground">Booking ID</p>
-                                        <p className="font-medium">{quote.booking_id}</p>
+                                        <p className="font-medium">#{quote.service_request_id}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">Job ID</p>
+                                        <p className="font-medium">#{quote.service_job_id}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">Amount</p>
                                         <p className="font-medium">
-                                            ${parseFloat(quote.quote_amount).toFixed(2)}
+                                            ${parseFloat(quote.job_price).toFixed(2)}
                                         </p>
                                     </div>
                                     <div>

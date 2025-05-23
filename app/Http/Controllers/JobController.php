@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Job;
 use App\Models\JobPrice;
 use App\Models\User;
+use App\Models\UserDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -17,7 +18,7 @@ class JobController extends Controller
 {
     public function index()
     {
-        $jobs = Job::with('client')->get();
+        $jobs = Job::with('client')->orderBy('created_at', 'desc')->get();
         $all_count = Job::count();
         $month_count = Job::whereBetween('created_at', [
             Carbon::now()->startOfMonth(), // 1st day of month
@@ -62,7 +63,17 @@ class JobController extends Controller
 
     public function show(Job $job)
     {
-        $contractors = User::where('role', 'contractor')->get();
+        $service_request = $job->serviceRequest()->first()->load(['client']);
+        $address = explode(', ', $service_request->client->address);
+        $city = $address[1];
+        $state = $address[2];
+        $country = $address[4];
+        $user_ids = UserDetail::where([
+            'country' => $country,
+            'state' => $state,
+            'city' => $city,
+        ])->get(['user_id'])->toArray();
+        $contractors = User::where('role', 'contractor')->whereIn('id', $user_ids)->get();
         $price = JobPrice::where('service_job_id', $job->id)->orderBy('created_at', 'desc')->get();
         return Inertia::render('Jobs/Show', [
             'job' => $job->load(['contractor', 'client', 'serviceRequest', 'quote']),
@@ -105,6 +116,7 @@ class JobController extends Controller
         $job->delete();
         return redirect()->route('jobs.index')->with('success', 'Job deleted successfully.');
     }
+
     public function priceAdd(Request $request)
     {
         $parts = explode(' - ', $request->get('contractor_name'));

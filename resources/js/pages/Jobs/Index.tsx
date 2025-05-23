@@ -18,13 +18,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { format } from 'date-fns';
 import {
     Pagination,
-    PaginationContent, PaginationEllipsis,
+    PaginationContent,
+    PaginationEllipsis,
     PaginationItem,
-    PaginationLink, PaginationNext,
+    PaginationLink,
+    PaginationNext,
     PaginationPrevious
 } from '@/components/ui/pagination';
-import { StatusBadge } from '@/pages/Requests';
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { StatusBadge } from '@/components/status-badge';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -171,7 +173,7 @@ export default function Index({ jobs, all_count, month_count, week_count, approv
                                         {/*<TableCell>{job.arrival_times}</TableCell>*/}
                                         <TableCell>{format(new Date(job.schedule_date), 'dd/MM/yyyy')}</TableCell>
                                         <TableCell>{job.total_price}</TableCell>
-                                        <TableCell><StatusBadge status={job.status} /></TableCell>
+                                        <TableCell><StatusBadge  status={job.status}/></TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button size={'icon'} variant={'ghost'}>
                                                 <Link href={`/jobs/${job.id}`}>

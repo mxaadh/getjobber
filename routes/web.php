@@ -5,7 +5,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ServiceRequestController;
-use App\Http\Controllers\QuoteController;
+//use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\JobController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -19,7 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class);
     Route::resource('bookings', ServiceRequestController::class);
     Route::post('bookings/quote-add', [ServiceRequestController::class, 'quoteAdd'])->name('bookings.quote-add');
-    Route::resource('quotes', QuoteController::class);
+//    Route::resource('quotes', QuoteController::class);
+    Route::resource('jobs', JobController::class);
 });
 
 Route::get('/quotes/{quote}/approve/{token}', [ServiceRequestController::class, 'approve'])

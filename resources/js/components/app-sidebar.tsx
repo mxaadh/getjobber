@@ -1,18 +1,26 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, ContactRound, ArchiveRestore, Stamp, Briefcase, ReceiptText } from 'lucide-react';
+import { ArchiveRestore, Briefcase, ContactRound, LayoutGrid, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
-        icon: LayoutGrid,
-    },
+        icon: LayoutGrid
+    }
 
 ];
 
@@ -20,12 +28,12 @@ const bookingNavItems: NavItem[] = [
     {
         title: 'Clients',
         href: '/clients',
-        icon: ContactRound,
+        icon: ContactRound
     },
     {
         title: 'Bookings',
         href: '/bookings',
-        icon: ArchiveRestore,
+        icon: ArchiveRestore
     },
     // {
     //     title: 'Quotes',
@@ -35,8 +43,8 @@ const bookingNavItems: NavItem[] = [
     {
         title: 'Jobs',
         href: '/jobs',
-        icon: Briefcase,
-    },
+        icon: Briefcase
+    }
     // {
     //     title: 'Invoices',
     //     href: '/invoices',
@@ -48,8 +56,8 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Users',
         href: '/users',
-        icon: Users,
-    },
+        icon: Users
+    }
 ];
 
 export function AppSidebar() {
@@ -69,7 +77,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                <NavMain platform={"Booking"} items={bookingNavItems} />
+                <NavMain platform={'Booking'} items={bookingNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

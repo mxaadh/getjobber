@@ -33,7 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function Index({ jobs, all_count, month_count, week_count }) {
+export default function Index({ jobs, all_count, month_count, week_count, approved_count, pending_count }: any) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Requests" />
@@ -47,8 +47,40 @@ export default function Index({ jobs, all_count, month_count, week_count }) {
                     </Button>
                 </PageHeadingButtons>
 
-                <StatsOverview title={'Jobs'} week={week_count} month={month_count}
-                               all={all_count} />
+                <StatsOverview
+                    stats={[
+                        {
+                            title: 'Approved Jobs',
+                            description: 'Total Approved',
+                            // icon: <EyeIcon className="h-4 w-4 text-green-500" />,
+                            value: approved_count
+                        },
+                        {
+                            title: 'Pending Jobs',
+                            description: 'Total Pending',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: pending_count
+                        },
+                        {
+                            title: 'Weekly Jobs',
+                            description: 'This week',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: week_count
+                        },
+                        {
+                            title: 'Monthly Jobs',
+                            description: 'This month',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: month_count
+                        },
+                        {
+                            title: 'All Jobs',
+                            description: 'Overall',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: all_count
+                        }
+                    ]}
+                />
 
                 {/* Clients table */}
                 <Card>

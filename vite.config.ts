@@ -9,17 +9,17 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             ssr: 'resources/js/ssr.tsx',
-            refresh: true,
+            refresh: true
         }),
         react(),
-        tailwindcss(),
+        tailwindcss()
     ],
     esbuild: {
-        jsx: 'automatic',
+        jsx: 'automatic'
     },
     resolve: {
         alias: {
-            'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
-        },
-    },
+            'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy')
+        }
+    }
 });

@@ -56,7 +56,14 @@ export function StatusBadge({ status }) {
     );
 }
 
-export default function Index({ requests, requests_count, requests_count_month, requests_count_week }) {
+export default function Index({
+                                  requests,
+                                  requests_count,
+                                  requests_approved_count,
+                                  requests_unapproved_count,
+                                  requests_count_month,
+                                  requests_count_week
+                              }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Requests" />
@@ -70,8 +77,40 @@ export default function Index({ requests, requests_count, requests_count_month, 
                     </Button>
                 </PageHeadingButtons>
 
-                <StatsOverview title={'Bookings'} week={requests_count_week} month={requests_count_month}
-                               all={requests_count} />
+                <StatsOverview
+                    stats={[
+                        {
+                            title: 'Approved Bookings',
+                            description: 'Total Approved Bookings',
+                            // icon: <EyeIcon className="h-4 w-4 text-green-500" />,
+                            value: requests_approved_count
+                        },
+                        {
+                            title: 'Pending Bookings',
+                            description: 'Total Pending Bookings',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: requests_unapproved_count
+                        },
+                        {
+                            title: 'Weekly Bookings',
+                            description: 'This week Bookings',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: requests_count_week
+                        },
+                        {
+                            title: 'Monthly Bookings',
+                            description: 'This month Bookings',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: requests_count_month
+                        },
+                        {
+                            title: 'All Bookings',
+                            description: 'Overall Bookings',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: requests_count
+                        }
+                    ]}
+                />
 
                 {/* Clients table */}
                 <Card>

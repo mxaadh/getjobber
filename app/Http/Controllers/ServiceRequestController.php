@@ -21,6 +21,9 @@ class ServiceRequestController extends Controller
     {
         $requests = ServiceRequest::latest()->get();
         $requests_count = ServiceRequest::count();
+        $requests_approved_count = ServiceRequest::where('status', ServiceRequest::STATUS_APPROVED)->count();
+        $requests_unapproved_count = ServiceRequest::whereNot('status', ServiceRequest::STATUS_APPROVED)->count();
+        $requests_count = ServiceRequest::count();
         $requests_count_month = ServiceRequest::whereBetween('created_at', [
             Carbon::now()->startOfMonth(), // 1st day of month
             Carbon::now() // current time
@@ -33,6 +36,8 @@ class ServiceRequestController extends Controller
         return Inertia::render('Requests/Index')->with([
             'requests' => $requests,
             'requests_count' => $requests_count,
+            'requests_approved_count' => $requests_approved_count,
+            'requests_unapproved_count' => $requests_unapproved_count,
             'requests_count_month' => $requests_count_month,
             'requests_count_week' => $requests_count_week,
         ]);
@@ -178,7 +183,12 @@ class ServiceRequestController extends Controller
             return redirect()->back()->with('error', 'Cannot approve a rejected quote');
         }
 
+
         $quote->approve();
+        $quote->booking->update([
+            'status' => ServiceRequest::STATUS_APPROVED,
+            'quote_amount' => $quote->quote_amount,
+        ]);
         $data = [
             'client_id' => $quote->booking->client_id,
             'service_request_id' => $quote->booking_id,
@@ -208,6 +218,9 @@ class ServiceRequestController extends Controller
         }
 
         $quote->reject();
+        $quote->booking->update([
+            'status' => ServiceRequest::STATUS_REJECTED,
+        ]);
 
         return view('quotes.response', [
             'message' => 'Quote has been rejected.',

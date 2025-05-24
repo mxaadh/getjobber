@@ -33,6 +33,8 @@ class ServiceRequestController extends Controller
             Carbon::now() // current time
         ])->count();
 
+//        $requests = $query->paginate(10);
+
         return Inertia::render('Requests/Index')->with([
             'requests' => $requests,
             'requests_count' => $requests_count,

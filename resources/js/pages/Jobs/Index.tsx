@@ -87,7 +87,7 @@ export default function Index({ jobs, all_count, month_count, week_count, approv
                 {/* Clients table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>All Bookings</CardTitle>
+                        <CardTitle>All Jobs</CardTitle>
                         <CardDescription>{all_count} results</CardDescription>
                         {/* Filters and Search */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">

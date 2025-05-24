@@ -14,7 +14,7 @@ import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import React from 'react';
+import React, { useEffect } from 'react';
 import PageHeadingButtons from '@/components/page-heading-buttons';
 import StatsOverview from '@/components/StatsOverview';
 import { format } from 'date-fns';
@@ -46,6 +46,12 @@ export default function Index({ clients, clients_count, clients_count_month, cli
         });
     };
 
+    useEffect(() => {
+        get('/clients', {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }, [data.search]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -123,15 +129,7 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                                     {data.search && (
                                         <X
                                             className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
-                                            onClick={() => {
-                                                setData('search', '');
-                                                get('/clients', {
-                                                    preserveState: true,
-                                                    preserveScroll: true,
-                                                    data: { search: '' } // Explicitly clear the search parameter
-                                                });
-
-                                            }}
+                                            onClick={() => setData('search', '')}
                                         />
                                     )}
                                     <Input

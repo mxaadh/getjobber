@@ -65,18 +65,19 @@ class JobController extends Controller
         return redirect()->route('jobs.index')->with('success', 'Job created successfully.');
     }
 
-    public function show(Job $job)
+    public function show(Request $request, Job $job)
     {
-        $service_request = $job->serviceRequest()->first()->load(['client']);
-        $address = explode(', ', $service_request->client->address);
-        $city = $address[1];
-        $state = $address[2];
-        $country = $address[4];
-        $user_ids = UserDetail::where([
-            'country' => $country,
-            'state' => $state,
-            'city' => $city,
-        ])->get(['user_id'])->toArray();
+//        $service_request = $job->serviceRequest()->first()->load(['client']);
+//        $address = explode(', ', $service_request->client->address);
+//        $city = $address[1];
+//        $state = $address[2];
+        $user_ids = [];
+        if ($request->has('country') && !empty($request->country)) {
+            $country = $request->country;
+            $user_ids = UserDetail::where([
+                'country' => $country,
+            ])->get(['user_id'])->toArray();
+        }
         $contractors = User::where('role', 'contractor')->whereIn('id', $user_ids)->get();
         $price = JobPrice::where('service_job_id', $job->id)->orderBy('created_at', 'desc')->get();
         return Inertia::render('Jobs/Show', [

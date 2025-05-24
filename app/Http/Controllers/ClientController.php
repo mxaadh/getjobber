@@ -43,7 +43,7 @@ class ClientController extends Controller
         }
 
         $clients = $query->paginate(10);
-//dd($clients);
+
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
             'clients_count' => $clients_count,

@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Timeline } from '@/components/timeline';
 import { Edit, GitCommitVertical, LocateIcon, PhoneCall } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import SelectCountry from '@/components/select-country';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -120,13 +121,12 @@ export function JobDetailsCard({ client, service_request }: { client: any, servi
 }
 
 export default function show({ job, contractors, price }: { job: any, contractors: any, price: any }) {
-    console.log('contractors == ', contractors);
-    console.log('job == ', job);
     const { data, setData, post, reset } = useForm({
         job_id: job.id,
         service_request_id: job.service_request_id,
         contractor_name: '',
-        job_price: ''
+        job_price: '',
+        country: ''
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -156,6 +156,7 @@ export default function show({ job, contractors, price }: { job: any, contractor
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto p-6">
+                                <SelectCountry value={''} job_id={job.id} />
                                 <Label htmlFor="quote-amount">Select Contractor</Label>
                                 <Select
                                     id="contractor"

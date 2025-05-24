@@ -38,7 +38,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function Index({ users }) {
+export default function Index({ users, employee_count, contractor_count, client_count }) {
     const { data, setData, post, reset } = useForm({
         name: '',
         email: '',
@@ -66,7 +66,22 @@ export default function Index({ users }) {
                     </Button>
                 </PageHeadingButtons>
 
-                <StatsOverview title={'Users'} />
+                <StatsOverview
+                    stats={[
+                        {
+                            title: 'Employees',
+                            value: employee_count
+                        },
+                        {
+                            title: 'Contractors',
+                            value: contractor_count
+                        },
+                        {
+                            title: 'Clients',
+                            value: client_count
+                        },
+                    ]}
+                />
 
                 <Card>
                     <CardHeader>

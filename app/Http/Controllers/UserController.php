@@ -16,10 +16,17 @@ class UserController extends Controller
      */
     public function index()
     {
+//        employee_count, contractor_count, client_count
         $users = User::latest()->get();
+        $employee_count = User::where('role', User::ROLE_EMPLOYEE)->count();
+        $contractor_count = User::where('role', User::ROLE_CONTRACTOR)->count();
+        $client_count = User::where('role', User::ROLE_CLIENT)->count();
 
         return Inertia::render('Users/Index', [
             'users' => $users,
+            'employee_count' => $employee_count,
+            'contractor_count' => $contractor_count,
+            'client_count' => $client_count,
         ]);
     }
 

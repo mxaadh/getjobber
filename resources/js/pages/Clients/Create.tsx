@@ -8,6 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import React from 'react';
 import PageHeadingButtons from '@/components/page-heading-buttons';
+import { countries } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -182,12 +183,11 @@ export default function Create() {
                                                 <SelectValue placeholder="Select country" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="af">Afghanistan</SelectItem>
-                                                <SelectItem value="us">United States</SelectItem>
-                                                <SelectItem value="uk">United Kingdom</SelectItem>
-                                                <SelectItem value="ca">Canada</SelectItem>
-                                                <SelectItem value="au">Australia</SelectItem>
-                                                {/* Add more countries as needed */}
+                                                {Object.entries(countries).map(([code, name]) => (
+                                                    <SelectItem key={code} value={name}>  {/* Using name as value */}
+                                                        {name}
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>

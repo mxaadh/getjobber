@@ -98,6 +98,6 @@ class User extends Authenticatable
             return 'No address found';
         }
 
-        return "{$address->street1}, {$address->city}, {$address->state}, {$address->country}";
+        return "{$address->city}, {$address->state}, {$address->country}";
     }
 }

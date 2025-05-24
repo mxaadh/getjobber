@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import React from 'react';
+import { countries } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -128,12 +129,19 @@ export default function Create() {
                                 <div className="grid grid-cols-2 gap-5">
                                     <div>
                                         <Label className="text-sm font-medium text-gray-700">Country</Label>
-                                        <Input
-                                            type="text"
-                                            placeholder="Country"
-                                            value={data.country}
-                                            onChange={(e) => setData('country', e.target.value)}
-                                        />
+                                        <Select value={data.country}
+                                                onValueChange={(value) => setData('country', value)}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select country" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.entries(countries).map(([code, name]) => (
+                                                    <SelectItem key={code} value={name}>  {/* Using name as value */}
+                                                        {name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div>
                                         <Label className="text-sm font-medium text-gray-700">State</Label>

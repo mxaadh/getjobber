@@ -9,6 +9,7 @@ import type { BreadcrumbItem } from '@/types';
 import React from 'react';
 import PageHeadingButtons from '@/components/page-heading-buttons';
 import { countries } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,7 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Create() {
-    const { data, setData, post, reset } = useForm({
+    const { data, setData, post, errors, reset, processing} = useForm({
         first_name: '',
         last_name: '',
         company_name: '',
@@ -72,6 +73,7 @@ export default function Create() {
                                             value={data.first_name}
                                             onChange={(e) => setData('first_name', e.target.value)}
                                         />
+                                        {errors.first_name && <div className="text-red-500 text-xs">{errors.first_name}</div>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="last-name">Last name</Label>
@@ -82,6 +84,7 @@ export default function Create() {
                                             value={data.last_name}
                                             onChange={(e) => setData('last_name', e.target.value)}
                                         />
+                                        {errors.last_name && <div className="text-red-500 text-xs">{errors.last_name}</div>}
                                     </div>
                                 </div>
 
@@ -94,6 +97,7 @@ export default function Create() {
                                         value={data.company_name}
                                         onChange={(e) => setData('company_name', e.target.value)}
                                     />
+                                    {errors.company_name && <div className="text-red-500 text-xs">{errors.company_name}</div>}
                                 </div>
 
                                 <div className="space-y-4">
@@ -107,6 +111,7 @@ export default function Create() {
                                             value={data.phone}
                                             onChange={(e) => setData('phone', e.target.value)}
                                         />
+                                        {errors.phone && <div className="text-red-500 text-xs">{errors.phone}</div>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Email</Label>
@@ -117,6 +122,7 @@ export default function Create() {
                                             value={data.email}
                                             onChange={(e) => setData('email', e.target.value)}
                                         />
+                                        {errors.email && <div className="text-red-500 text-xs">{errors.email}</div>}
                                     </div>
                                 </div>
                             </div>
@@ -141,6 +147,7 @@ export default function Create() {
                                            value={data.street1}
                                            onChange={(e) => setData('street1', e.target.value)}
                                     />
+                                    {errors.street1 && <div className="text-red-500 text-xs">{errors.street1}</div>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="street2">Street 2 (Optional)</Label>
@@ -157,6 +164,7 @@ export default function Create() {
                                                value={data.city}
                                                onChange={(e) => setData('city', e.target.value)}
                                         />
+                                        {errors.city && <div className="text-red-500 text-xs">{errors.city}</div>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="state">State</Label>
@@ -164,6 +172,7 @@ export default function Create() {
                                                value={data.state}
                                                onChange={(e) => setData('state', e.target.value)}
                                         />
+                                        {errors.state && <div className="text-red-500 text-xs">{errors.state}</div>}
                                     </div>
                                 </div>
 
@@ -174,6 +183,7 @@ export default function Create() {
                                                value={data.postal_code}
                                                onChange={(e) => setData('postal_code', e.target.value)}
                                         />
+                                        {errors.postal_code && <div className="text-red-500 text-xs">{errors.postal_code}</div>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="country">Country</Label>
@@ -190,6 +200,7 @@ export default function Create() {
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                        {errors.country && <div className="text-red-500 text-xs">{errors.country}</div>}
                                     </div>
                                 </div>
                             </div>
@@ -201,7 +212,10 @@ export default function Create() {
                         <Button variant="outline">
                             <Link href={'/clients'}>Cancel</Link>
                         </Button>
-                        <Button type={'submit'}>Save Client</Button>
+                        <Button type={'submit'} disabled={processing}>
+                            { processing && <Loader2 className="animate-spin" /> }
+                            Save Client
+                        </Button>
                     </div>
                 </form>
             </div>

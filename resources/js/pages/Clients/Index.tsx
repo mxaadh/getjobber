@@ -1,14 +1,6 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious
-} from '@/components/ui/pagination';
+import {PaginationComponent} from '@/components/pagination-component';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -16,10 +8,10 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Edit, EyeIcon, Filter, Plus, Search, Trash } from 'lucide-react';
+import { Edit, EyeIcon, Filter, Loader2, Plus, Search, Trash, X } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import React from 'react';
@@ -33,7 +25,28 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/clients'
     }
 ];
-export default function Index({ clients, clients_count, clients_count_month, clients_count_week }) {
+export default function Index({ clients, clients_count, clients_count_month, clients_count_week, searchQuery = '' }) {
+    const { delete: destroy, processing } = useForm();
+
+    const handleDelete = (id) => {
+        if (confirm('Are you sure you want to delete this client?')) {
+            destroy(`/clients/${id}`);
+        }
+    };
+
+    const { data, setData, get } = useForm({
+        search: searchQuery || '',
+    });
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        get('/clients', {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Clients" />
@@ -103,36 +116,37 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                                         </DropdownMenuCheckboxItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
-
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="flex gap-2">
-                                            <Filter className="h-4 w-4" />
-                                            Tags
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56">
-                                        <DropdownMenuCheckboxItem checked>
-                                            All
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem>
-                                            Loads
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem>
-                                            Active
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem>
-                                            Leads and Active
-                                        </DropdownMenuCheckboxItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
                             </div>
                             <div className="relative w-full md:w-64">
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search clients..."
-                                    className="pl-9"
-                                />
+                                <form onSubmit={handleSearch}>
+                                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    {data.search && (
+                                        <X
+                                            className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
+                                            onClick={() => {
+                                                setData('search', '');
+                                                get('/clients', {
+                                                    preserveState: true,
+                                                    preserveScroll: true,
+                                                    data: { search: '' } // Explicitly clear the search parameter
+                                                });
+
+                                            }}
+                                        />
+                                    )}
+                                    <Input
+                                        placeholder="Search clients..."
+                                        className="pl-9"
+                                        value={data.search}
+                                        onChange={(e) => setData('search', e.target.value)}
+                                        onKeyUp={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleSearch(e);
+                                            }
+                                        }}
+
+                                    />
+                                </form>
                             </div>
                         </div>
                     </CardHeader>
@@ -141,49 +155,45 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Name</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Phone</TableHead>
                                     <TableHead>Address</TableHead>
-                                    <TableHead>Tags</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Created at</TableHead>
                                     <TableHead className={'text-right'}>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {clients.map((client) => (
-                                    <TableRow>
+                                {clients.data.map((client) => (
+                                    <TableRow key={client.id}>
                                         <TableCell>{client.full_name}</TableCell>
+                                        <TableCell>{client.email}</TableCell>
+                                        <TableCell>{client.phone}</TableCell>
                                         <TableCell>{client.address}</TableCell>
-                                        <TableCell></TableCell>
                                         <TableCell>
                                             <Badge variant="default">Active</Badge>
                                         </TableCell>
                                         <TableCell>{format(new Date(client.created_at), 'dd/MM/yyyy')}</TableCell>
                                         <TableCell className="text-right space-x-2">
-                                            <Button size={'icon'} variant={'ghost'}>
-                                                <Link href={`/clients/${client.id}`}>
+                                            <Link href={`/clients/${client.id}`}>
+                                                <Button size={'icon'} variant={'ghost'}>
                                                     <EyeIcon className={'text-green-800'} />
-                                                </Link>
-                                            </Button>
-                                            <Button size={'icon'} variant={'ghost'}>
-                                                <Link href={`/clients/${client.id}/edit`}>
-                                                    <Edit className={'text-yellow-800'} />
-                                                </Link>
-                                            </Button>
-                                            <form
-                                                method="POST"
-                                                action={`/clients/${client.id}`}
-                                                onSubmit={(e) => {
-                                                    e.preventDefault();
-                                                    if (confirm('Are you sure?')) {
-                                                        Inertia.delete(`/clients/${client.id}`);
-                                                    }
-                                                }}
-                                                className="inline"
-                                            >
-                                                <Button type={'submit'} size={'icon'} variant={'ghost'}>
-                                                    <Trash className={'text-red-800'} />
                                                 </Button>
-                                            </form>
+                                            </Link>
+                                            <Link href={`/clients/${client.id}/edit`}>
+                                                <Button size={'icon'} variant={'ghost'}>
+                                                    <Edit className={'text-yellow-800'} />
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                onClick={() => handleDelete(client.id)}
+                                                size={'icon'}
+                                                variant={'ghost'}
+                                                disabled={processing}
+                                            >
+                                                <Trash className={'text-red-800'} />
+                                                {processing && <Loader2 className="animate-spin" />}
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -191,30 +201,7 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                         </Table>
                     </CardContent>
                     <CardFooter className={'items-end'}>
-                        <Pagination className={'justify-end'}>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious href="#" />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">1</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#" isActive>
-                                    2
-                                    </PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">3</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationEllipsis />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationNext href="#" />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
+                        <PaginationComponent pagination={clients} />
                     </CardFooter>
                 </Card>
             </div>

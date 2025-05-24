@@ -51,10 +51,26 @@ export default function Index({ clients, clients_count, clients_count_month, cli
 
                 {/* Cards section */}
                 <StatsOverview
-                    title={'Client'}
-                    week={clients_count_week}
-                    month={clients_count_month}
-                    all={clients_count}
+                    stats={[
+                        {
+                            title: 'Weekly Clients',
+                            description: 'This week',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: clients_count_week
+                        },
+                        {
+                            title: 'Monthly Clients',
+                            description: 'This month',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: clients_count_month
+                        },
+                        {
+                            title: 'All Clients',
+                            description: 'Overall',
+                            // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
+                            value: clients_count
+                        }
+                    ]}
                 />
 
                 {/* Clients table */}

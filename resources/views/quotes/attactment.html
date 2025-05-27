@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quotation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-placeholder,
+        .status {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .logo-placeholder {
+            width: 40%;
+            background-color: #ddd;
+            color: #777;
+        }
+
+        .status {
+            width: 40%;
+            text-align: right;
+            color: red;
+        }
+
+        .details-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .details-left,
+        .details-right {
+            width: 48%;
+        }
+
+        h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .flotRight {
+            float: right;
+        }
+
+        .details-right p {
+            margin: 5px 0;
+            text-align: right;
+        }
+
+        .details-right span {
+            font-weight: bold;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .totals {
+            text-align: right;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .company-info,
+        .payment-info {
+            width: 48%;
+        }
+
+        .payment-info p {
+            display: block;
+            width:100%;
+            float: right;
+            text-align: right;
+            margin-bottom: 0;        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-placeholder">[ Company Logo ]</div>
+            <div class="status">Status: Unpaid</div>
+        </div>
+
+        <div class="details-section">
+            <div class="details-left">
+                <h3>Issued to</h3>
+                <p>Three Little Birds Kangaroo Point (Jay Bassi)</p>
+                <p>jbassi1985@gmail.com</p>
+                <p>1/22 Baildon St, Kangaroo Point 4169</p>
+            </div>
+            <div class="details-right">
+                <h3 style="text-align: right;">Quotation Details</h3>
+                <p><span>Quotation #</span> &nbsp;&nbsp; #00211</p>
+                <p><span>Date of Issue</span> &nbsp;&nbsp; 26/05/2025</p>
+                <p><span>Due Date</span> &nbsp;&nbsp; 26/05/2025</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Quotation Summary</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Commercial Kitchen Deep Cleaning</td>
+                        <td>$1650</td>
+                        <td>$1650</td>
+                    </tr>
+                    <tr>
+                        <td>Walk-in fridge fan and surrounding area</td>
+                        <td>$285</td>
+                        <td>$285</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="totals"><strong>Sub Total:</strong> $1935</p>
+            <p class="totals"><strong>GST (10%):</strong> $193.50</p>
+            <p class="totals"><strong>Total Due:</strong> $2,128.50</p>
+        </div>
+
+        <div class="info-row section">
+            <div class="company-info">
+                <h3>Company Info</h3>
+                <p><strong>Serene Facility Group</strong><br>
+                    ABN: 37 679 720 391<br>
+                    Phone: 1300 123 734<br>
+                    Email: <a href="mailto:info@serenefacilitygroup.com.au">info@serenefacilitygroup.com.au</a><br>
+                    Website: <a href="http://www.serenefacilitygroup.com.au"
+                        target="_blank">www.serenefacilitygroup.com.au</a>
+                </p>
+            </div>
+
+            <div class="payment-info">
+                <h3 class="flotRight" style="display: block;">PLEASE MAKE A PAYMENT TO</h3>
+                <p class="flotRight" style="display: block;"><strong>Account Name:</strong> Serene Facility Group</p>
+                <p class="flotRight" style="display: block;"><strong>BSB:</strong> 034 093</p>
+                <p class="flotRight" style="display: block;"><strong>Account Number:</strong> 913 137</p>
+                <br>
+                <p class="flotRight">Thank you for your business!</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            © Serene Facility Group – All rights reserved.
+        </div>
+    </div>
+</body>
+
+</html>

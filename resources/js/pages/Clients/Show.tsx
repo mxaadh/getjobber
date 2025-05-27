@@ -7,7 +7,10 @@ import { Head, Link } from '@inertiajs/react';
 import React from 'react';
 import type { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
-import { Plus } from 'lucide-react';
+import { Edit, EyeIcon, Plus, Trash } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { StatusBadge } from '@/components/status-badge';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,7 +18,8 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/clients'
     }
 ];
-export default function Show() {
+export default function Show({client}) {
+    console.log(client);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Clients" />
@@ -30,62 +34,69 @@ export default function Show() {
                                 <CardTitle>Properties</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <h3 className="font-medium">Name</h3>
-                                    <div className="pl-4 space-y-1">
-                                        <p>M. Aa, S.H. Seem K.</p>
-                                        <p>Name1</p>
-                                        <p className="text-sm text-muted-foreground">Date: 2020/01/03</p>
-                                    </div>
-                                </div>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Street 1</TableHead>
+                                            <TableHead>Street 2</TableHead>
+                                            <TableHead>City</TableHead>
+                                            <TableHead>State</TableHead>
+                                            <TableHead>Postal Code</TableHead>
+                                            <TableHead>Country</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {client.properties.map((property) => (
+                                            <TableRow key={property.id}>
+                                                <TableCell className="font-medium">{property.street1}</TableCell>
+                                                <TableCell className="font-medium">{property.street2}</TableCell>
+                                                <TableCell className="font-medium">{property.city}</TableCell>
+                                                <TableCell className="font-medium">{property.state}</TableCell>
+                                                <TableCell className="font-medium">{property.postal_code}</TableCell>
+                                                <TableCell className="font-medium">{property.country}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </CardContent>
                         </Card>
 
                         {/* Overview */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Overview</CardTitle>
+                                <CardTitle>Request</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Active Work</TableHead>
-                                            <TableHead>Requests</TableHead>
-                                            <TableHead>Objects</TableHead>
-                                            <TableHead>Jobs</TableHead>
-                                            <TableHead>Timeless</TableHead>
+                                            <TableHead>Preferred Day</TableHead>
+                                            <TableHead>Alternate Day</TableHead>
+                                            <TableHead>Arrival Times</TableHead>
+                                            <TableHead>Services</TableHead>
+                                            <TableHead>Quote</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        <TableRow>
-                                            <TableCell className="font-medium">Active + Total Over</TableCell>
-                                            <TableCell>Scheduled Site</TableCell>
-                                            <TableCell>Scheduled Site</TableCell>
-                                            <TableCell>M. Aa, S.H. Seem K. Search, Suite 7550</TableCell>
-                                            <TableCell className="font-medium">$16.00</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell className="font-medium">Scheduled Site</TableCell>
-                                            <TableCell>Scheduled Site</TableCell>
-                                            <TableCell>Scheduled Site</TableCell>
-                                            <TableCell>M. Aa, S.H. Seem K. Search, Suite 7550</TableCell>
-                                            <TableCell className="font-medium">$8.00</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell className="font-medium">Search IT</TableCell>
-                                            <TableCell>Scheduled Access</TableCell>
-                                            <TableCell>Scheduled Access</TableCell>
-                                            <TableCell></TableCell>
-                                            <TableCell className="font-medium">$6.00</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell className="font-medium">2 Profi</TableCell>
-                                            <TableCell>Scheduled Access</TableCell>
-                                            <TableCell>Scheduled Access</TableCell>
-                                            <TableCell></TableCell>
-                                            <TableCell className="font-medium">$5.00</TableCell>
-                                        </TableRow>
+                                        {client.service_requests.map((request) => (
+                                            <TableRow key={request.id}>
+                                                <TableCell>{format(new Date(request.preferred_day), 'dd/MM/yyyy')}</TableCell>
+                                                <TableCell>{format(new Date(request.alternate_day), 'dd/MM/yyyy')}</TableCell>
+                                                <TableCell>{request.arrival_times}</TableCell>
+                                                <TableCell>{request.cleaning_services}</TableCell>
+                                                <TableCell>{request.quote_amount}</TableCell>
+                                                <TableCell><StatusBadge status={request.status} /></TableCell>
+                                                <TableCell>
+                                                    <Button size={'icon'} variant={'ghost'}>
+                                                        <Link href={`/bookings/${request.id}`}>
+                                                            <EyeIcon className={'text-green-800'} />
+                                                        </Link>
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
                                     </TableBody>
                                 </Table>
                             </CardContent>
@@ -139,22 +150,26 @@ export default function Show() {
                         {/* Contact Info */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Contact info</CardTitle>
+                                <CardTitle>User info</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Table>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell className="font-medium">Info</TableCell>
-                                            <TableCell>+12345678953</TableCell>
+                                            <TableCell className="font-medium">Name</TableCell>
+                                            <TableCell>{client.full_name}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell className="font-medium">Date</TableCell>
-                                            <TableCell>Issued: 06/09/2014 am</TableCell>
+                                            <TableCell className="font-medium">Phone</TableCell>
+                                            <TableCell>{client.phone}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell className="font-medium">Last Source</TableCell>
-                                            <TableCell>Facebook</TableCell>
+                                            <TableCell className="font-medium">Email</TableCell>
+                                            <TableCell>{client.email}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell className="font-medium">Joining Data</TableCell>
+                                            <TableCell>{client.created_at}</TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>

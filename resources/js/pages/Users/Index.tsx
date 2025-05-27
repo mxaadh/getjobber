@@ -67,6 +67,7 @@ export default function Index({ users, employee_count, contractor_count, client_
                 </PageHeadingButtons>
 
                 <StatsOverview
+                    _route={'users.index'}
                     stats={[
                         {
                             title: 'Employees',

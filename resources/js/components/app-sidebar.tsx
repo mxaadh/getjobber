@@ -31,8 +31,8 @@ const bookingNavItems: NavItem[] = [
         icon: ContactRound
     },
     {
-        title: 'Bookings',
-        href: '/bookings',
+        title: 'Reuquests',
+        href: '/requests',
         icon: ArchiveRestore
     },
     // {

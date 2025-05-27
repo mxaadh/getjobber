@@ -18,7 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('users', UserController::class);
     Route::resource('clients', ClientController::class);
-    Route::resource('bookings', ServiceRequestController::class);
+    Route::resource('requests', ServiceRequestController::class);
     Route::post('bookings/quote-add', [ServiceRequestController::class, 'quoteAdd'])->name('bookings.quote-add');
 //    Route::resource('quotes', QuoteController::class);
     Route::resource('jobs', JobController::class);

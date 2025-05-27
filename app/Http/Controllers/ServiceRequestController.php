@@ -17,9 +17,9 @@ class ServiceRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $requests = ServiceRequest::latest()->get();
+        $query = ServiceRequest::latest();
         $requests_count = ServiceRequest::count();
         $requests_approved_count = ServiceRequest::where('status', ServiceRequest::STATUS_APPROVED)->count();
         $requests_unapproved_count = ServiceRequest::whereNot('status', ServiceRequest::STATUS_APPROVED)->count();
@@ -33,7 +33,38 @@ class ServiceRequestController extends Controller
             Carbon::now() // current time
         ])->count();
 
-//        $requests = $query->paginate(10);
+        // Filter functionality
+        if ($request->has('filter') && !empty($request->filter)) {
+            // Handle custom filters or fallback
+            switch ($request->filter) {
+                case 'Approved Requests':
+                    $query->where('status',ServiceRequest::STATUS_APPROVED);
+                    break;
+                case 'Pending Requests':
+                    // Special case where status is not approved
+                    $query->whereNot('status', ServiceRequest::STATUS_APPROVED);
+                    break;
+                case 'Weekly Requests':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfWeek(), // Monday
+                        Carbon::now() // current time
+                    ]);
+                    break;
+                case 'Monthly Requests':
+                    // Special case where status is not approved
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth(), // 1st day of month
+                        Carbon::now() // current time
+                    ]);
+                    break;
+                case 'All%20Requests':
+                    $query->all();
+                    break;
+                // Add other custom filter cases as needed
+            }
+        }
+
+        $requests = $query->paginate(10);
 
         return Inertia::render('Requests/Index')->with([
             'requests' => $requests,
@@ -92,7 +123,7 @@ class ServiceRequestController extends Controller
             'internal_notes' => $validated['internal_notes'],
         ])->save();
 
-        return redirect()->route('bookings.index')->with('success', 'Request created successfully.');
+        return redirect()->route('requests.index')->with('success', 'Request created successfully.');
     }
 
     /**
@@ -141,7 +172,7 @@ class ServiceRequestController extends Controller
         $serviceRequest = ServiceRequest::findOrFail($id);
         $serviceRequest->delete();
 
-        return redirect()->route('bookings.index')->with('success', 'Request deleted successfully.');
+        return redirect()->route('requests.index')->with('success', 'Request deleted successfully.');
     }
 
     public function quoteAdd(Request $request)
@@ -170,7 +201,7 @@ class ServiceRequestController extends Controller
         Mail::to($quotationData['customer_email'])
             ->send(new QuotationMail($quotationData));
 
-        return redirect()->route('bookings.show', $request['service_request_id'])->with('success', 'Quote added successfully.');
+        return redirect()->route('requests.show', $request['service_request_id'])->with('success', 'Quote added successfully.');
     }
 
     public function approve(BookingQuote $quote, $token)

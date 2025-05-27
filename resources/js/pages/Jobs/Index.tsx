@@ -50,6 +50,7 @@ export default function Index({ jobs, all_count, month_count, week_count, approv
                 </PageHeadingButtons>
 
                 <StatsOverview
+                    _route={'jobs.index'}
                     stats={[
                         {
                             title: 'Approved Jobs',

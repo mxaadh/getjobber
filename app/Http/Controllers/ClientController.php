@@ -118,8 +118,7 @@ class ClientController extends Controller
      */
     public function show($id)
     {
-        $client = Client::findOrFail($id);
-
+        $client = Client::with('properties', 'serviceRequests')->findOrFail($id);
         return Inertia::render('Clients/Show', [
             'client' => $client,
         ]);

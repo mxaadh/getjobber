@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Bookings',
-        href: '/bookings'
+        href: '/requests'
     },
     {
         title: 'Booking Detail',
@@ -125,7 +125,7 @@ export default function show({ request, quotes, approvedQuotes }: { request: any
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/bookings/quote-add', {
+        post('/requests/quote-add', {
             onSuccess: () => reset()
         });
     };
@@ -136,7 +136,7 @@ export default function show({ request, quotes, approvedQuotes }: { request: any
             <div className="space-y-6 m-2 p-2">
                 <PageHeadingButtons heading={`Bookings Details for ${request.client_name}`}>
                     <Button>
-                        <Link href={`/bookings/${request.id}/edit`} className="flex items-center gap-1">
+                        <Link href={`/requests/${request.id}/edit`} className="flex items-center gap-1">
                             <Edit />
                             Edit
                         </Link>
@@ -162,7 +162,7 @@ export default function show({ request, quotes, approvedQuotes }: { request: any
                                 />
                                 <div className="flex justify-end gap-2">
                                     <Button variant="outline">
-                                        <Link href={'/bookings'}>Cancel</Link>
+                                        <Link href={'/requests'}>Cancel</Link>
                                     </Button>
                                     <Button type={'submit'} disabled={approvedQuotes}>Send Email</Button>
                                 </div>

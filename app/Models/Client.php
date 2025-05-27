@@ -29,5 +29,8 @@ class Client extends Model
         return "{$property->street1}, {$property->city}, {$property->state}, {$property->postal_code}, {$property->country}";
     }
 
-
+    public function serviceRequests()
+    {
+        return $this->hasMany(ServiceRequest::class);
+    }
 }

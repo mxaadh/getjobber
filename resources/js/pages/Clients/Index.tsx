@@ -70,6 +70,7 @@ export default function Index({ clients, clients_count, clients_count_month, cli
 
                 {/* Cards section */}
                 <StatsOverview
+                    _route={'clients.index'}
                     stats={[
                         {
                             title: 'Weekly Clients',

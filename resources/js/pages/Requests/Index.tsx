@@ -30,15 +30,15 @@ import {
 import StatsOverview from '@/components/StatsOverview';
 import { format } from 'date-fns';
 import { StatusBadge } from '@/components/status-badge';
+import { PaginationComponent } from '@/components/pagination-component';
+import React from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Bookings',
-        href: '/bookings'
+        title: 'Requests',
+        href: '/requests'
     }
 ];
-
-
 
 export default function Index({
                                   requests,
@@ -48,48 +48,50 @@ export default function Index({
                                   requests_count_month,
                                   requests_count_week
                               }) {
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Requests" />
             <div className="space-y-6 m-2 p-2">
-                <PageHeadingButtons heading={'Bookings'}>
+                <PageHeadingButtons heading={'Request'}>
                     <Button>
-                        <Link href={`/bookings/create`} className="flex items-center gap-1">
+                        <Link href={`/requests/create`} className="flex items-center gap-1">
                             <Plus />
-                            New Booking
+                            New Request
                         </Link>
                     </Button>
                 </PageHeadingButtons>
 
                 <StatsOverview
+                    _route={'requests.index'}
                     stats={[
                         {
-                            title: 'Approved Bookings',
-                            description: 'Total Approved Bookings',
+                            title: 'Approved Requests',
+                            description: 'Total Approved Requests',
                             // icon: <EyeIcon className="h-4 w-4 text-green-500" />,
                             value: requests_approved_count
                         },
                         {
-                            title: 'Pending Bookings',
-                            description: 'Total Pending Bookings',
+                            title: 'Pending Requests',
+                            description: 'Total Pending Requests',
                             // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
                             value: requests_unapproved_count
                         },
                         {
-                            title: 'Weekly Bookings',
-                            description: 'This week Bookings',
+                            title: 'Weekly Requests',
+                            description: 'This week Requests',
                             // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
                             value: requests_count_week
                         },
                         {
-                            title: 'Monthly Bookings',
-                            description: 'This month Bookings',
+                            title: 'Monthly Requests',
+                            description: 'This month Requests',
                             // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
                             value: requests_count_month
                         },
                         {
-                            title: 'All Bookings',
-                            description: 'Overall Bookings',
+                            title: 'All Requests',
+                            description: 'Overall Requests',
                             // icon: <EyeIcon className="h-4 w-4 text-yellow-500" />,
                             value: requests_count
                         }
@@ -99,7 +101,7 @@ export default function Index({
                 {/* Clients table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>All Bookings</CardTitle>
+                        <CardTitle>All Requests</CardTitle>
                         <CardDescription>{requests_count} results</CardDescription>
                         {/* Filters and Search */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -130,7 +132,7 @@ export default function Index({
                             <div className="relative w-full md:w-64">
                                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
-                                    placeholder="Search Bookings..."
+                                    placeholder="Search Requests..."
                                     className="pl-9"
                                 />
                             </div>
@@ -151,7 +153,7 @@ export default function Index({
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {requests.map((request) => (
+                                {requests.data.map((request) => (
                                     <TableRow key={request.id}>
                                         <TableCell>{request.client_name}</TableCell>
                                         <TableCell>{format(new Date(request.preferred_day), 'dd/MM/yyyy')}</TableCell>
@@ -162,22 +164,22 @@ export default function Index({
                                         <TableCell><StatusBadge status={request.status} /></TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button size={'icon'} variant={'ghost'}>
-                                                <Link href={`/bookings/${request.id}`}>
+                                                <Link href={`/requests/${request.id}`}>
                                                     <EyeIcon className={'text-green-800'} />
                                                 </Link>
                                             </Button>
                                             <Button variant="ghost">
-                                                <Link href={`/bookings/${request.id}/edit`}>
+                                                <Link href={`/requests/${request.id}/edit`}>
                                                     <Edit className={'text-yellow-800'} />
                                                 </Link>
                                             </Button>
                                             <form
                                                 method="POST"
-                                                action={`/bookings/${request.id}`}
+                                                action={`/requests/${request.id}`}
                                                 onSubmit={(e) => {
                                                     e.preventDefault();
                                                     if (confirm('Are you sure?')) {
-                                                        Inertia.delete(`/bookings/${request.id}`);
+                                                        Inertia.delete(`/requests/${request.id}`);
                                                     }
                                                 }}
                                                 className="inline"
@@ -193,30 +195,7 @@ export default function Index({
                         </Table>
                     </CardContent>
                     <CardFooter className={'items-end'}>
-                        <Pagination className={'justify-end'}>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious href="#" />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">1</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#" isActive>
-                                        2
-                                    </PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">3</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationEllipsis />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationNext href="#" />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
+                        <PaginationComponent pagination={requests} />
                     </CardFooter>
                 </Card>
             </div>

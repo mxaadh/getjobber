@@ -7,6 +7,9 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ServiceRequestController;
 //use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StripeWebhookController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -19,16 +22,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('clients', ClientController::class);
     Route::resource('requests', ServiceRequestController::class);
-    Route::post('bookings/quote-add', [ServiceRequestController::class, 'quoteAdd'])->name('bookings.quote-add');
+    Route::post('requests/quote-add', [ServiceRequestController::class, 'quoteAdd'])->name('bookings.quote-add');
+    Route::get('requests/approve/{quote}', [ServiceRequestController::class, 'approve'])->name('requests.approve');
+    Route::get('requests/reject/{quote}', [ServiceRequestController::class, 'reject'])->name('requests.reject');
+    Route::get('requests/checkout/{request}', [ServiceRequestController::class, 'checkout'])->name('requests.checkout');
+
 //    Route::resource('quotes', QuoteController::class);
     Route::resource('jobs', JobController::class);
     Route::post('jobs/price-add', [JobController::class, 'priceAdd'])->name('jobs.price-add');
+    Route::resource('services',ServiceController::class);
+
+
+//    Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 });
 
-Route::get('/quotes/{quote}/approve/{token}', [ServiceRequestController::class, 'approve'])
-    ->name('quotes.approve');
-Route::get('/quotes/{quote}/reject/{token}', [ServiceRequestController::class, 'reject'])
-    ->name('quotes.reject');
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
+//    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::get('/prices/{price}/approve/{token}', [JobController::class, 'approve'])
     ->name('prices.approve');

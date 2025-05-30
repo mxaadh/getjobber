@@ -10,9 +10,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem
 } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { ArchiveRestore, Briefcase, ContactRound, LayoutGrid, Users } from 'lucide-react';
+import { type NavItem, SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import { ArchiveRestore, Briefcase, ContactRound, LayoutGrid, ServerIcon, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -57,10 +57,18 @@ const footerNavItems: NavItem[] = [
         title: 'Users',
         href: '/users',
         icon: Users
+    },
+    {
+        title: 'Services',
+        href: '/services',
+        icon: ServerIcon
     }
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
+    const { role } = auth.user;
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -68,7 +76,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
-                                <AppLogo/>
+                                <AppLogo />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -81,7 +89,9 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {['admin', 'employee'].includes(role) && (
+                    <NavFooter items={footerNavItems} className="mt-auto" />
+                )}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

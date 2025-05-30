@@ -3,11 +3,13 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Mail\Mailables\Attachment;
 
 class QuotationMail extends Mailable
 {
@@ -23,19 +25,21 @@ class QuotationMail extends Mailable
     public function __construct($quotationData)
     {
         $this->quotationData = $quotationData;
-        $this->approveUrl = route('quotes.approve', [
-            'quote' => $this->quotationData['id'],
-            'token' => $this->generateToken($this->quotationData['id'], 'approve')
-        ]);
-        $this->rejectUrl = route('quotes.reject', [
-            'quote' => $this->quotationData['id'],
-            'token' => $this->generateToken($this->quotationData['id'], 'reject')
-        ]);
+//        $this->approveUrl = route('quotes.approve', [
+//            'quote' => $this->quotationData['id'],
+//            'token' => $this->generateToken($this->quotationData['id'], 'approve')
+//        ]);
+//        $this->rejectUrl = route('quotes.reject', [
+//            'quote' => $this->quotationData['id'],
+//            'token' => $this->generateToken($this->quotationData['id'], 'reject')
+//        ]);
+        $this->approveUrl = route('requests.show', $this->quotationData['service_request_id']);
+        $this->rejectUrl = route('requests.show', $this->quotationData['service_request_id']);
     }
 
     protected function generateToken($quoteId, $action)
     {
-        return hash_hmac('sha256', $quoteId.$action, config('app.key'));
+        return hash_hmac('sha256', $quoteId . $action, config('app.key'));
     }
 
     /**
@@ -54,7 +58,7 @@ class QuotationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.quotation'
+            view: 'emails.quotation',
         );
     }
 
@@ -65,6 +69,11 @@ class QuotationMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        $pdf = Pdf::loadView('emails.quotation_pdf', ['quotationData' => $this->quotationData]);
+
+        return [
+            Attachment::fromData(fn() => $pdf->output(), 'quotation_' . $this->quotationData['quotation_number'] . '.pdf')
+                ->withMime('application/pdf')
+        ];
     }
 }

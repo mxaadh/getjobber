@@ -6,12 +6,12 @@ import PageHeadingButtons from '@/components/page-heading-buttons';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Bookings',
-        href: '/bookings'
+        title: 'Requests',
+        href: '/requests'
     },
     {
-        title: 'Add Bookings',
-        href: '/bookings/create'
+        title: 'Add Request',
+        href: '/requests/create'
     }
 ];
 
@@ -20,7 +20,7 @@ export default function Create({clients}: { clients: any[] }) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={'Create Request'} />
             <div className="space-y-6 m-2 p-2">
-                <PageHeadingButtons heading={'Add New Booking'} />
+                <PageHeadingButtons heading={'Add New Request'} />
                 <BookingForm clients={clients}/>
             </div>
         </AppLayout>

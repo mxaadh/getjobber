@@ -18,7 +18,7 @@ class JobController extends Controller
 {
     public function index()
     {
-        $jobs = Job::with('client')->orderBy('created_at', 'desc')->get();
+        $query = Job::with('client')->latest();
         $all_count = Job::count();
         $approved_count = Job::where('status', Job::STATUS_APPROVED)->count();
         $pending_count = Job::whereNot('status', Job::STATUS_APPROVED)->count();
@@ -30,6 +30,9 @@ class JobController extends Controller
             Carbon::now()->startOfWeek(), // Monday
             Carbon::now() // current time
         ])->count();
+
+        $jobs = $query->paginate(10);
+
         return Inertia::render('Jobs/Index', [
             'jobs' => $jobs,
             'all_count' => $all_count,

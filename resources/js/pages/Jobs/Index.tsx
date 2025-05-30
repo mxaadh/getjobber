@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/pagination';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { StatusBadge } from '@/components/status-badge';
+import { PaginationComponent } from '@/components/pagination-component';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -145,7 +146,7 @@ export default function Index({ jobs, all_count, month_count, week_count, approv
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {jobs.map((job) => (
+                                {jobs.data.map((job) => (
                                     <TableRow key={job.id}>
                                         <TableCell>{job.client.full_name}</TableCell>
                                         <TableCell>
@@ -208,30 +209,7 @@ export default function Index({ jobs, all_count, month_count, week_count, approv
                         </Table>
                     </CardContent>
                     <CardFooter className={'items-end'}>
-                        <Pagination className={'justify-end'}>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious href="#" />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">1</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#" isActive>
-                                        2
-                                    </PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">3</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationEllipsis />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationNext href="#" />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
+                        <PaginationComponent pagination={jobs} />
                     </CardFooter>
                 </Card>
             </div>

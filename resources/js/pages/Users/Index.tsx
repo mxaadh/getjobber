@@ -30,6 +30,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { PaginationComponent } from '@/components/pagination-component';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -138,7 +139,7 @@ export default function Index({ users, employee_count, contractor_count, client_
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {users.map((user) => (
+                                {users.data.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell>{user.name}</TableCell>
                                         <TableCell>{user.email}</TableCell>
@@ -172,30 +173,7 @@ export default function Index({ users, employee_count, contractor_count, client_
                         </Table>
                     </CardContent>
                     <CardFooter className={'items-end'}>
-                        <Pagination className={'justify-end'}>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious href="#" />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">1</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#" isActive>
-                                        2
-                                    </PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#">3</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationEllipsis />
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationNext href="#" />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
+                        <PaginationComponent pagination={users} />
                     </CardFooter>
                 </Card>
             </div>

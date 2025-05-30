@@ -1,15 +1,16 @@
 import React from 'react';
-import { usePage } from '@inertiajs/inertia-react';
 import { loadStripe } from '@stripe/stripe-js';
+import { usePage } from '@inertiajs/react';
+import { SharedData } from '@/types';
 
 const Checkout = () => {
-    const { stripeKey } = usePage().props;
+    const { stripeKey } = usePage<SharedData>().props;
 
     const handleCheckout = async () => {
-        const stripe = await loadStripe(stripeKey);
+        await loadStripe(stripeKey);
 
         // This will redirect to the Laravel checkout route
-        window.location.href = route('checkout');
+        window.location.href = route('requests.checkout');
     };
 
     return (

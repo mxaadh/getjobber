@@ -121,7 +121,7 @@ export function BookingTimeline({ quotes }) {
                                 {!quote.is_approved && !quote.is_rejected && (
                                     <div className="mt-4 flex flex-col gap-2">
                                         <div className="flex gap-2">
-                                            {role === 'contractor' && (
+                                            {role === 'client' && (
                                                 <>
                                                     <Button className="bg-green-600 hover:bg-green-700 text-white"
                                                             onClick={() => handleApprove(quote)}>Approve</Button>

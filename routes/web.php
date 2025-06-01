@@ -30,8 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //    Route::resource('quotes', QuoteController::class);
     Route::resource('jobs', JobController::class);
     Route::post('jobs/price-add', [JobController::class, 'priceAdd'])->name('jobs.price-add');
-    Route::get('/prices/{price}/approve', [JobController::class, 'approve'])->name('prices.approve');
-    Route::get('/prices/{price}/reject', [JobController::class, 'reject'])->name('prices.reject');
+    Route::get('/prices/{price}/approve', [JobController::class, 'approve'])->name('prices.approve.notoken');
+    Route::get('/prices/{price}/reject', [JobController::class, 'reject'])->name('prices.reject.notoken');
     Route::get('/jobs/{job}/start', [JobController::class, 'start'])->name('jobs.start');
     Route::post('/jobs/{job}/upload-pre-photos', [JobController::class, 'uploadPrePhotos']);
     Route::get('/jobs/{job}/complete', [JobController::class, 'complete'])->name('jobs.complete');
@@ -49,10 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 //    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
-Route::get('/prices/{price}/approve/{token}', [JobController::class, 'approve'])
-    ->name('prices.approve');
-Route::get('/prices/{price}/reject/{token}', [JobController::class, 'reject'])
-    ->name('prices.reject');
+Route::get('/prices/{price}/approve/{token}', [JobController::class, 'approve'])->name('prices.approve');
+Route::get('/prices/{price}/reject/{token}', [JobController::class, 'reject'])->name('prices.reject');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

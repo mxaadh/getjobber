@@ -178,7 +178,7 @@ class JobController extends Controller
             'total_price' => $price->job_price,
         ]);
 
-        return view('quotes.response', [
+        return redirect()->route('jobs.show', $price->service_job_id)->with([
             'message' => 'Price approved successfully!',
             'quote' => $price
         ]);

@@ -1,27 +1,28 @@
-import { useState } from "react";
-import { format } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CircleSmall } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CircleSmall } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useForm, usePage } from '@inertiajs/react';
+import { SharedData } from '@/types';
 
 function StatusBadge({ quote }) {
     const status = {
-        className: "bg-yellow-100 text-yellow-800",
-        label: "Pending",
-        title: "Pending approval"
+        className: 'bg-yellow-100 text-yellow-800',
+        label: 'Pending',
+        title: 'Pending approval'
     };
 
     if (quote.is_approved) {
-        status.className = "bg-green-100 text-green-800";
-        status.label = "Approved";
+        status.className = 'bg-green-100 text-green-800';
+        status.label = 'Approved';
         status.title = `Approved on ${new Date(quote.approved_at).toLocaleString()}`;
     } else if (quote.is_rejected) {
-        status.className = "bg-red-100 text-red-800";
-        status.label = "Rejected";
+        status.className = 'bg-red-100 text-red-800';
+        status.label = 'Rejected';
         status.title = `Rejected on ${new Date(quote.rejected_at).toLocaleString()}`;
     }
 
@@ -36,10 +37,13 @@ function StatusBadge({ quote }) {
 }
 
 export function BookingTimeline({ quotes }) {
+    const { auth } = usePage<SharedData>().props;
+    const { role } = auth.user;
+
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedQuote, setSelectedQuote] = useState(null);
     const { data, setData, get } = useForm({
-        reason: '',
+        reason: ''
     });
 
     const handleApprove = (quote) => {
@@ -52,7 +56,7 @@ export function BookingTimeline({ quotes }) {
             get(`/requests/reject/${selectedQuote.id}?reason=${encodeURIComponent(data.reason)}`);
             console.log(`Quote ${selectedQuote.id} rejected for reason: ${data.reason}`);
             setDialogOpen(false);
-            setData('reason', " ");
+            setData('reason', ' ');
         }
     };
 
@@ -91,17 +95,17 @@ export function BookingTimeline({ quotes }) {
                                     <div>
                                         <p className="text-xs text-muted-foreground">
                                             {quote.is_approved
-                                                ? "Approved At"
+                                                ? 'Approved At'
                                                 : quote.is_rejected
-                                                    ? "Rejected At"
-                                                    : "Last Updated"}
+                                                    ? 'Rejected At'
+                                                    : 'Last Updated'}
                                         </p>
                                         <p className="font-medium">
                                             {quote.is_approved && quote.approved_at
-                                                ? format(new Date(quote.approved_at), "MMM d, yyyy h:mm a")
+                                                ? format(new Date(quote.approved_at), 'MMM d, yyyy h:mm a')
                                                 : quote.is_rejected && quote.rejected_at
-                                                    ? format(new Date(quote.rejected_at), "MMM d, yyyy h:mm a")
-                                                    : format(new Date(quote.updated_at), "MMM d, yyyy h:mm a")}
+                                                    ? format(new Date(quote.rejected_at), 'MMM d, yyyy h:mm a')
+                                                    : format(new Date(quote.updated_at), 'MMM d, yyyy h:mm a')}
                                         </p>
                                     </div>
                                     {quote.reason && (
@@ -117,39 +121,44 @@ export function BookingTimeline({ quotes }) {
                                 {!quote.is_approved && !quote.is_rejected && (
                                     <div className="mt-4 flex flex-col gap-2">
                                         <div className="flex gap-2">
-                                            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApprove(quote)}>Approve</Button>
-                                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        variant="destructive"
-                                                        onClick={() => {
-                                                            setSelectedQuote(quote);
-                                                            setDialogOpen(true);
-                                                        }}
-                                                    >
-                                                        Reject
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Reason for Rejection</DialogTitle>
-                                                    </DialogHeader>
-                                                    <Textarea
-                                                        placeholder="Enter reason for rejection"
-                                                        value={data.reason}
-                                                        onChange={(e) => setData('reason', e.target.value)}
-                                                    />
-                                                    <DialogFooter>
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => setDialogOpen(false)}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                        <Button onClick={handleReject}>Submit</Button>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
+                                            {role === 'contractor' && (
+                                                <>
+                                                    <Button className="bg-green-600 hover:bg-green-700 text-white"
+                                                            onClick={() => handleApprove(quote)}>Approve</Button>
+                                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                variant="destructive"
+                                                                onClick={() => {
+                                                                    setSelectedQuote(quote);
+                                                                    setDialogOpen(true);
+                                                                }}
+                                                            >
+                                                                Reject
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Reason for Rejection</DialogTitle>
+                                                            </DialogHeader>
+                                                            <Textarea
+                                                                placeholder="Enter reason for rejection"
+                                                                value={data.reason}
+                                                                onChange={(e) => setData('reason', e.target.value)}
+                                                            />
+                                                            <DialogFooter>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    onClick={() => setDialogOpen(false)}
+                                                                >
+                                                                    Cancel
+                                                                </Button>
+                                                                <Button onClick={handleReject}>Submit</Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -162,12 +171,13 @@ export function BookingTimeline({ quotes }) {
     );
 }
 
-export function Timeline({ quotes }: TimelineProps) {
-    console.log(quotes);
+export function Timeline({ quotes }) {
+    const { auth } = usePage<SharedData>().props;
+    const { role } = auth.user;
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedQuote, setSelectedQuote] = useState(null);
     const { data, setData, get } = useForm({
-        reason: '',
+        reason: ''
     });
 
     const handleApprove = (quote) => {
@@ -177,11 +187,10 @@ export function Timeline({ quotes }: TimelineProps) {
 
     const handleReject = () => {
         if (selectedQuote && data.reason) {
-
             get(`/prices/${selectedQuote.id}/reject?reason=${encodeURIComponent(data.reason)}`);
             console.log(`Quote ${selectedQuote.id} rejected for reason: ${data.reason}`);
             setDialogOpen(false);
-            setData('reason', " ");
+            setData('reason', ' ');
         }
     };
 
@@ -202,7 +211,7 @@ export function Timeline({ quotes }: TimelineProps) {
                                     Quote #{quote.id}
                                 </CardTitle>
                                 <div className="flex items-center gap-2">
-                                    <StatusBadge quote={quote}/>
+                                    <StatusBadge quote={quote} />
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -224,17 +233,17 @@ export function Timeline({ quotes }: TimelineProps) {
                                     <div>
                                         <p className="text-xs text-muted-foreground">
                                             {quote.is_approved
-                                                ? "Approved At"
+                                                ? 'Approved At'
                                                 : quote.is_rejected
-                                                    ? "Rejected At"
-                                                    : "Last Updated"}
+                                                    ? 'Rejected At'
+                                                    : 'Last Updated'}
                                         </p>
                                         <p className="font-medium">
                                             {quote.is_approved && quote.approved_at
-                                                ? format(new Date(quote.approved_at), "MMM d, yyyy h:mm a")
+                                                ? format(new Date(quote.approved_at), 'MMM d, yyyy h:mm a')
                                                 : quote.is_rejected && quote.rejected_at
-                                                    ? format(new Date(quote.rejected_at), "MMM d, yyyy h:mm a")
-                                                    : format(new Date(quote.updated_at), "MMM d, yyyy h:mm a")}
+                                                    ? format(new Date(quote.rejected_at), 'MMM d, yyyy h:mm a')
+                                                    : format(new Date(quote.updated_at), 'MMM d, yyyy h:mm a')}
                                         </p>
                                     </div>
                                     {quote.reason && (
@@ -250,39 +259,45 @@ export function Timeline({ quotes }: TimelineProps) {
                                 {!quote.is_approved && !quote.is_rejected && (
                                     <div className="mt-4 flex flex-col gap-2">
                                         <div className="flex gap-2">
-                                            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApprove(quote)}>Approve</Button>
-                                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        variant="destructive"
-                                                        onClick={() => {
-                                                            setSelectedQuote(quote);
-                                                            setDialogOpen(true);
-                                                        }}
-                                                    >
-                                                        Reject
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Reason for Rejection</DialogTitle>
-                                                    </DialogHeader>
-                                                    <Textarea
-                                                        placeholder="Enter reason for rejection"
-                                                        value={data.reason}
-                                                        onChange={(e) => setData('reason', e.target.value)}
-                                                    />
-                                                    <DialogFooter>
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => setDialogOpen(false)}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                        <Button onClick={handleReject}>Submit</Button>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
+                                            {role === 'contractor' && (
+                                                <>
+                                                    <Button className="bg-green-600 hover:bg-green-700 text-white"
+                                                            onClick={() => handleApprove(quote)}>Approve</Button>
+                                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                variant="destructive"
+                                                                onClick={() => {
+                                                                    setSelectedQuote(quote);
+                                                                    setDialogOpen(true);
+                                                                }}
+                                                            >
+                                                                Reject
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Reason for Rejection</DialogTitle>
+                                                            </DialogHeader>
+                                                            <Textarea
+                                                                placeholder="Enter reason for rejection"
+                                                                value={data.reason}
+                                                                onChange={(e) => setData('reason', e.target.value)}
+                                                            />
+                                                            <DialogFooter>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    onClick={() => setDialogOpen(false)}
+                                                                >
+                                                                    Cancel
+                                                                </Button>
+                                                                <Button onClick={handleReject}>Submit</Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
+
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 )}

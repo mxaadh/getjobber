@@ -2,9 +2,11 @@
 
 namespace App\Mail;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -66,6 +68,11 @@ class PricingMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        $pdf = Pdf::loadView('emails.quotation_pdf', ['quotationData' => $this->quotationData]);
+
+        return [
+            Attachment::fromData(fn() => $pdf->output(), 'quotation_' . $this->quotationData['quotation_number'] . '.pdf')
+                ->withMime('application/pdf')
+        ];
     }
 }

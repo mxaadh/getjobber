@@ -7,6 +7,8 @@ use App\Models\Client;
 use App\Models\Job;
 use App\Models\JobPhoto;
 use App\Models\JobPrice;
+use App\Models\QuoteItem;
+use App\Models\Service;
 use App\Models\User;
 use App\Models\UserDetail;
 use Carbon\Carbon;
@@ -82,11 +84,14 @@ class JobController extends Controller
             ])->get(['user_id'])->toArray();
         }
         $contractors = User::where('role', 'contractor')->whereIn('id', $user_ids)->get();
-        $price = JobPrice::where('service_job_id', $job->id)->orderBy('created_at', 'desc')->get();
+        $price = JobPrice::with('items')->where('service_job_id', $job->id)->orderBy('created_at', 'desc')->get();
+        $services = Service::all();
+
         return Inertia::render('Jobs/Show', [
             'job' => $job->load(['contractor', 'client', 'serviceRequest', 'quote']),
             'contractors' => $contractors,
             'price' => $price,
+            'services' => $services,
         ]);
     }
 
@@ -127,6 +132,18 @@ class JobController extends Controller
 
     public function priceAdd(Request $request)
     {
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.name' => 'nullable|string',
+            'items.*.description' => 'nullable|string',
+            'items.*.quantity' => 'required|numeric|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.total' => 'required|numeric|min:0',
+            'subtotal' => 'required|numeric',
+            'tax_rate' => 'nullable|numeric',
+            'total' => 'required|numeric',
+        ]);
+
         $parts = explode(' - ', $request->get('contractor_name'));
         $contractor_id = $parts[0];
         $contractor_name = $parts[1];
@@ -136,23 +153,38 @@ class JobController extends Controller
         $job->update([
             'contractor_id' => $contractor_id,
             'status' => Job::STATUS_ACTIVE,
-            'job_price' => $request['job_price'],
+            'job_price' => $request['total'],
         ]);
 
         $price = JobPrice::create([
             'service_request_id' => $request['service_request_id'],
             'service_job_id' => $request['job_id'],
-            'job_price' => $request['job_price']
+            'job_price' => $request['total']
         ]);
+
+        foreach ($validated['items'] as $item) {
+            $items = QuoteItem::create([
+                'quote_id' => $price->id,
+                'name' => $item['name'] ?? '',
+                'description' => $item['description'] ?? '',
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'total' => $item['total'],
+            ]);
+        }
 
         $pricingData = [
             'id' => $price->id,
             'quotation_number' => 'QT-' . date('Ymd') . rand(100, 999),
             'customer_name' => $contractor_name,
             'customer_email' => $contractor_email,
-            'total_amount' => number_format($request['job_price'], 2),
+            'total_amount' => number_format($request['total'], 2),
             'description' => $request['description'] ?? null,
             'valid_until' => now()->addDays(7)->format('F j, Y'),
+            'items' => $validated['items'],
+            'subtotal' => $validated['subtotal'],
+            'tax' => $validated['tax'] ?? 0,
+            'date_of_issue' => $price->created_at->format('F j, Y'),
         ];
 
         Mail::to($pricingData['customer_email'])
@@ -230,10 +262,15 @@ class JobController extends Controller
         $job->update(['started_at' => now()]);
 
         $prePhotos = $job->photos()->where('type', 'pre')->get();
+        $price = JobPrice::with('items')->where([
+            'service_job_id' => $job->id,
+            'is_approved' => true,
+        ])->orderBy('created_at', 'desc')->first();
 
         return Inertia::render('Jobs/Start', [
             'job' => $job,
             'prePhotos' => $prePhotos,
+            'price' => $price,
         ]);
     }
 

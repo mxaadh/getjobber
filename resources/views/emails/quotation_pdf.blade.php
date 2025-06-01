@@ -93,7 +93,9 @@
             <h3>Issued to</h3>
             <p>{{ $quotationData['customer_name'] }}</p>
             <p>{{ $quotationData['customer_email'] }}</p>
-            <p>{{ $quotationData['customer_address'] }}</p>
+            @isset($quotationData['customer_address'])
+                <p>{{ $quotationData['customer_address'] }}</p>
+            @endisset
         </div>
         <div style="text-align:right;">
             <h3>Quotation Details</h3>

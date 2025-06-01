@@ -36,6 +36,11 @@ class JobPrice extends Model
         return $this->belongsTo(ServiceRequest::class);
     }
 
+    public function items()
+    {
+        return $this->hasMany(QuoteItem::class, 'quote_id');
+    }
+
     // Helper method to approve the quote
     public function approve()
     {

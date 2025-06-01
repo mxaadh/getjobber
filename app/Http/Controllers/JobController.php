@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PricingMail;
-use App\Models\BookingQuote;
 use App\Models\Client;
 use App\Models\Job;
+use App\Models\JobPhoto;
 use App\Models\JobPrice;
 use App\Models\User;
 use App\Models\UserDetail;
@@ -159,9 +159,10 @@ class JobController extends Controller
             ->send(new PricingMail($pricingData));
     }
 
-    public function approve(JobPrice $price, $token)
+    public function approve(JobPrice $price, $token = null)
     {
-        $this->validateToken($price->id, 'approve', $token);
+        if (!is_null($token))
+            $this->validateToken($price->id, 'approve', $token);
 
         if ($price->is_approved) {
             return redirect()->back()->with('error', 'This price is already approved');
@@ -183,9 +184,10 @@ class JobController extends Controller
         ]);
     }
 
-    public function reject(JobPrice $price, $token)
+    public function reject(JobPrice $price, Request $request, $token = null)
     {
-        $this->validateToken($price->id, 'reject', $token);
+        if (!is_null($token))
+            $this->validateToken($price->id, 'reject', $token);
 
         if ($price->is_approved) {
             return redirect()->back()->with('error', 'Cannot reject an approved price');
@@ -195,12 +197,12 @@ class JobController extends Controller
             return redirect()->back()->with('error', 'This price is already rejected');
         }
 
-        $price->reject();
+        $price->reject($request->reason ?? 'No reason provided');
         $price->ServiceJob->update([
             'status' => Job::STATUS_REJECTED,
         ]);
 
-        return view('quotes.response', [
+        return redirect()->route('jobs.show', $price->service_job_id)->with([
             'message' => 'Price has been rejected.',
             'quote' => $price
         ]);
@@ -221,5 +223,76 @@ class JobController extends Controller
         if (!hash_equals($validToken, $token)) {
             abort(403, 'Invalid action token');
         }
+    }
+
+    public function start(Job $job)
+    {
+        $job->update(['started_at' => now()]);
+
+        $prePhotos = $job->photos()->where('type', 'pre')->get();
+
+        return Inertia::render('Jobs/Start', [
+            'job' => $job,
+            'prePhotos' => $prePhotos,
+        ]);
+    }
+
+    public function uploadPrePhotos(Request $request, Job $job)
+    {
+        $request->validate([
+            'pre_photos.*' => 'image|max:5120' // max 5MB
+        ]);
+
+        foreach ($request->file('pre_photos', []) as $photo) {
+            $path = $photo->store("jobs/{$job->id}/pre", 'public');
+
+            // Save to DB if needed — JobPhoto model etc.
+            JobPhoto::create([
+                'service_job_id' => $job->id,
+                'path' => $path,
+                'type' => 'pre',
+            ]);
+        }
+
+        return redirect()->route('jobs.start', $job)->with('success', 'Pre-photos uploaded.');
+    }
+
+    public function complete(Job $job)
+    {
+        $postPhotos = $job->photos()->where('type', 'post')->get();
+
+        return Inertia::render('Jobs/Complete', [
+            'job' => $job,
+            'postPhotos' => $postPhotos,
+        ]);
+    }
+
+    public function uploadPostPhotos(Request $request, Job $job)
+    {
+        $request->validate([
+            'post_photos.*' => 'image|max:5120'
+        ]);
+
+        foreach ($request->file('post_photos', []) as $photo) {
+            $path = $photo->store("jobs/{$job->id}/post", 'public');
+
+            JobPhoto::create([
+                'service_job_id' => $job->id,
+                'path' => $path,
+                'type' => 'post',
+            ]);
+        }
+
+        return redirect()->route('jobs.complete', $job)->with('success', 'Post-photos uploaded.');
+    }
+
+    public function finish(Job $job)
+    {
+        $job->update([
+            'status' => Job::STATUS_COMPLETED,
+            'completed_at' => now(),
+        ]);
+
+        return redirect()->route('jobs.index')->with('success', 'Job completed successfully.');
     }
 }

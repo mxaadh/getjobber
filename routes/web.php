@@ -30,8 +30,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //    Route::resource('quotes', QuoteController::class);
     Route::resource('jobs', JobController::class);
     Route::post('jobs/price-add', [JobController::class, 'priceAdd'])->name('jobs.price-add');
-    Route::resource('services',ServiceController::class);
+    Route::get('/prices/{price}/approve', [JobController::class, 'approve'])->name('prices.approve');
+    Route::get('/prices/{price}/reject', [JobController::class, 'reject'])->name('prices.reject');
+    Route::get('/jobs/{job}/start', [JobController::class, 'start'])->name('jobs.start');
+    Route::post('/jobs/{job}/upload-pre-photos', [JobController::class, 'uploadPrePhotos']);
+    Route::get('/jobs/{job}/complete', [JobController::class, 'complete'])->name('jobs.complete');
+    Route::post('/jobs/{job}/upload-post-photos', [JobController::class, 'uploadPostPhotos'])->name('jobs.uploadPostPhotos');
+    Route::get('/jobs/{job}/finish', [JobController::class, 'finish'])->name('jobs.finish');
 
+
+    Route::resource('services',ServiceController::class);
 
 //    Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
     Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');

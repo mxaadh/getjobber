@@ -17,8 +17,12 @@ class Job extends Model
         'schedule_time',
         'notes',
         'total_price',
-        'status'
+        'status',
+        'started_at',
+        'completed_at'
     ];
+
+    protected $dates = ['started_at', 'completed_at'];
 
     protected $casts = [
         'schedule_date' => 'date',
@@ -56,5 +60,10 @@ class Job extends Model
     public function quote()
     {
         return $this->belongsTo(Quote::class);
+    }
+
+    public function photos()
+    {
+        return $this->hasMany(JobPhoto::class, 'service_job_id');
     }
 }

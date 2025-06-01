@@ -15,7 +15,8 @@ class JobPrice extends Model
         'is_approved',
         'approved_at',
         'is_rejected',
-        'rejected_at'
+        'rejected_at',
+        'reason'
     ];
 
     protected $casts = [
@@ -45,11 +46,12 @@ class JobPrice extends Model
     }
 
     // Helper method to reject the quote
-    public function reject()
+    public function reject($reason)
     {
         $this->update([
             'is_rejected' => true,
-            'rejected_at' => now()
+            'rejected_at' => now(),
+            'reason' => $reason
         ]);
     }
 }

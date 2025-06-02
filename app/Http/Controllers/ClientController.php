@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use App\Mail\WelcomeEmail;
+use Illuminate\Support\Facades\Mail;
 
 class ClientController extends Controller
 {
@@ -76,7 +78,23 @@ class ClientController extends Controller
             'country' => 'required|string|max:255'
         ]);
 
+        $user = User::create([
+            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email' => $validated['email'],
+            'password' => Hash::make('password'), // Default password
+            'role' => 'client',
+        ]);
+
+        UserDetail::create([
+            'user_id' => $user->id,
+            'phone' => $validated['phone'],
+            'country' => $validated['country'],
+            'state' => $validated['state'],
+            'city' => $validated['city'],
+        ]);
+
         $client = Client::create([
+            'user_id' => $user->id,
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'company_name' => $validated['company_name'],
@@ -95,20 +113,8 @@ class ClientController extends Controller
             'country' => $validated['country'],
         ]);
 
-        $user = User::create([
-            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-            'email' => $validated['email'],
-            'password' => Hash::make('password'), // Default password
-            'role' => 'client',
-        ]);
-
-        UserDetail::create([
-            'user_id' => $user->id,
-            'phone' => $validated['phone'],
-            'country' => $validated['country'],
-            'state' => $validated['state'],
-            'city' => $validated['city'],
-        ]);
+        // Send welcome email
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
         return redirect()->route('clients.index')->with('success', 'Client created successfully.');
     }

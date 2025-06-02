@@ -14,13 +14,28 @@ class UserController extends Controller
     /**
      * Display a listing of users.
      */
-    public function index()
+    public function index(Request $request)
     {
 //        employee_count, contractor_count, client_count
         $query = User::latest();
         $employee_count = User::where('role', User::ROLE_EMPLOYEE)->count();
         $contractor_count = User::where('role', User::ROLE_CONTRACTOR)->count();
         $client_count = User::where('role', User::ROLE_CLIENT)->count();
+
+        // Search functionality
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('userDetail', function($r) use ($search) {
+                      $r->where('phone', 'like', "%{$search}%")
+                        ->orWhere('country', 'like', "%{$search}%")
+                        ->orWhere('state', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%");
+                  });
+            });
+        }
 
         $users = $query->paginate(10);
 
@@ -29,6 +44,7 @@ class UserController extends Controller
             'employee_count' => $employee_count,
             'contractor_count' => $contractor_count,
             'client_count' => $client_count,
+            'searchQuery' => $request->search,
         ]);
     }
 
@@ -71,12 +87,12 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified user.
      */
-    public function edit($id)
+    public function edit(User $user)
     {
-        $user = User::findOrFail($id);
+        $user->load('userDetail');
 
         return Inertia::render('Users/Edit', [
-            'user' => $user,
+            'record' => $user,
         ]);
     }
 

@@ -1,23 +1,23 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import {PaginationComponent} from '@/components/pagination-component';
+import { PaginationComponent } from '@/components/pagination-component';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { Edit, EyeIcon, Filter, Loader2, Plus, Search, Trash, X } from 'lucide-react';
+import { Edit, EyeIcon, Filter, Loader2, Plus, Trash } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import React, { useEffect } from 'react';
 import PageHeadingButtons from '@/components/page-heading-buttons';
 import StatsOverview from '@/components/StatsOverview';
 import { format } from 'date-fns';
+import SearchInput from '@/components/search-box';
+import DeleteEntityDialog from '@/components/delete-buttom';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,21 +35,21 @@ export default function Index({ clients, clients_count, clients_count_month, cli
     };
 
     const { data, setData, get } = useForm({
-        search: searchQuery || '',
+        search: searchQuery || ''
     });
 
     const handleSearch = (e) => {
         e.preventDefault();
         get('/clients', {
             preserveState: true,
-            preserveScroll: true,
+            preserveScroll: true
         });
     };
 
     useEffect(() => {
         get('/clients', {
             preserveState: true,
-            preserveScroll: true,
+            preserveScroll: true
         });
     }, [data.search]);
 
@@ -101,7 +101,7 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                         {/* Filters and Search */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                             <div className="flex gap-2 w-full md:w-auto">
-                                <DropdownMenu>
+                                {/*<DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="outline" className="flex gap-2">
                                             <Filter className="h-4 w-4" />
@@ -122,31 +122,14 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                                             Inactive
                                         </DropdownMenuCheckboxItem>
                                     </DropdownMenuContent>
-                                </DropdownMenu>
+                                </DropdownMenu>*/}
                             </div>
-                            <div className="relative w-full md:w-64">
-                                <form onSubmit={handleSearch}>
-                                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                    {data.search && (
-                                        <X
-                                            className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
-                                            onClick={() => setData('search', '')}
-                                        />
-                                    )}
-                                    <Input
-                                        placeholder="Search clients..."
-                                        className="pl-9"
-                                        value={data.search}
-                                        onChange={(e) => setData('search', e.target.value)}
-                                        onKeyUp={(e) => {
-                                            if (e.key === 'Enter') {
-                                                handleSearch(e);
-                                            }
-                                        }}
-
-                                    />
-                                </form>
-                            </div>
+                            <SearchInput
+                                searchValue={data.search}
+                                onSearchChange={(value) => setData('search', value)}
+                                onSearchSubmit={handleSearch}
+                                onClearSearch={() => setData('search', '')}
+                            />
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -157,7 +140,7 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                                     <TableHead>Email</TableHead>
                                     <TableHead>Phone</TableHead>
                                     <TableHead>Address</TableHead>
-                                    <TableHead>Status</TableHead>
+                                    {/*<TableHead>Status</TableHead>*/}
                                     <TableHead>Created at</TableHead>
                                     <TableHead className={'text-right'}>Actions</TableHead>
                                 </TableRow>
@@ -169,9 +152,6 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                                         <TableCell>{client.email}</TableCell>
                                         <TableCell>{client.phone}</TableCell>
                                         <TableCell>{client.address}</TableCell>
-                                        <TableCell>
-                                            <Badge variant="default">Active</Badge>
-                                        </TableCell>
                                         <TableCell>{format(new Date(client.created_at), 'dd/MM/yyyy')}</TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Link href={`/clients/${client.id}`}>
@@ -184,15 +164,7 @@ export default function Index({ clients, clients_count, clients_count_month, cli
                                                     <Edit className={'text-yellow-800'} />
                                                 </Button>
                                             </Link>
-                                            <Button
-                                                onClick={() => handleDelete(client.id)}
-                                                size={'icon'}
-                                                variant={'ghost'}
-                                                disabled={processing}
-                                            >
-                                                <Trash className={'text-red-800'} />
-                                                {processing && <Loader2 className="animate-spin" />}
-                                            </Button>
+                                            <DeleteEntityDialog url={`/clients/${client.id}`} />
                                         </TableCell>
                                     </TableRow>
                                 ))}

@@ -2,13 +2,8 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
 import type { BreadcrumbItem } from '@/types';
 import PageHeadingButtons from '@/components/page-heading-buttons';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import React from 'react';
-import { countries } from '@/lib/utils';
+import { UserForm } from '@/pages/Users/Form';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Create() {
-    const { data, setData, post, reset } = useForm({
+    const { data, setData, post, errors, reset, processing } = useForm({
         name: '',
         email: '',
         password: '',
@@ -42,135 +37,17 @@ export default function Create() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={'Create Request'} />
+            <Head title={'Create User'} />
             <div className="space-y-2 m-2 p-2">
                 <PageHeadingButtons heading={'Add New User'} />
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>User Info</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 gap-5">
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-700">Name</Label>
-                                    <Input
-                                        type="text"
-                                        placeholder="Name"
-                                        value={data.name}
-                                        onChange={(e) => setData('name', e.target.value)}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-700">Email</Label>
-                                    <Input
-                                        type="email"
-                                        placeholder="Email"
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-700">Password</Label>
-                                    <Input
-                                        type="password"
-                                        placeholder="Password"
-                                        value={data.password}
-                                        onChange={(e) => setData('password', e.target.value)}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-700">Role</Label>
-                                    <Select onValueChange={(value) => setData('role', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Role" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="admin">Admin</SelectItem>
-                                            <SelectItem value="employee">Employee</SelectItem>
-                                            <SelectItem value="contractor">Contractor</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                        </CardContent>
-                    </Card>
-
-                    <div className={'grid grid-cols-2 gap-5'}>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Contact</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-2 gap-5">
-                                    <div>
-                                        <Label className="text-sm font-medium text-gray-700">Phone</Label>
-                                        <Input
-                                            type="tel"
-                                            placeholder="Phone"
-                                            value={data.phone}
-                                            onChange={(e) => setData('phone', e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Address</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-2 gap-5">
-                                    <div>
-                                        <Label className="text-sm font-medium text-gray-700">Country</Label>
-                                        <Select value={data.country}
-                                                onValueChange={(value) => setData('country', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select country" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {Object.entries(countries).map(([code, name]) => (
-                                                    <SelectItem key={code} value={name}>  {/* Using name as value */}
-                                                        {name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div>
-                                        <Label className="text-sm font-medium text-gray-700">State</Label>
-                                        <Input
-                                            type="text"
-                                            placeholder="State"
-                                            value={data.state}
-                                            onChange={(e) => setData('state', e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-sm font-medium text-gray-700">City</Label>
-                                        <Input
-                                            type="text"
-                                            placeholder="City"
-                                            value={data.city}
-                                            onChange={(e) => setData('city', e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="w-full flex justify-end">
-                        <Button type="submit">Create User</Button>
-                    </div>
-                </form>
-
+                <UserForm
+                    data={data}
+                    setData={setData}
+                    errors={errors}
+                    onSubmit={handleSubmit}
+                    submitButtonText={processing ? 'Creating...' : 'Create User'}
+                    isUpdate={false}
+                />
             </div>
         </AppLayout>
     );

@@ -1,23 +1,16 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import PageHeadingButtons from '@/components/page-heading-buttons';
-import { Edit, EyeIcon, Filter, Plus, Search, Trash } from 'lucide-react';
+import { Edit, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import StatsOverview from '@/components/StatsOverview';
-import { format } from 'date-fns';
-import { StatusBadge } from '@/components/status-badge';
 import { PaginationComponent } from '@/components/pagination-component';
 import React from 'react';
+import { format } from 'date-fns';
+import SearchInput from '@/components/search-box';
+import DeleteEntityDialog from '@/components/delete-buttom';
 
 const module = 'Services';
 
@@ -28,7 +21,18 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function Index({records}) {
+export default function Index({ records, searchQuery }) {
+    const { data, setData, get } = useForm({
+        search: searchQuery || ''
+    });
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        get('/services', {
+            preserveState: true,
+            preserveScroll: true
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -36,7 +40,7 @@ export default function Index({records}) {
             <div className="space-y-6 m-2 p-2">
                 <PageHeadingButtons heading={module}>
                     <Button>
-                        <Link href={`/service/create`} className="flex items-center gap-1">
+                        <Link href={`/services/create`} className="flex items-center gap-1">
                             <Plus />
                             New {module}
                         </Link>
@@ -46,17 +50,15 @@ export default function Index({records}) {
                 <Card>
                     <CardHeader>
                         <CardTitle>All {module}</CardTitle>
-                        <CardDescription>{records.length} results</CardDescription>
+                        <CardDescription>{records.total} results</CardDescription>
                         {/* Filters and Search */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                             <div></div>
-                            <div className="relative w-full md:w-64">
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search ..."
-                                    className="pl-9"
-                                />
-                            </div>
+                            <SearchInput
+                                searchValue={data.search}
+                                onSearchChange={(value) => setData('search', value)}
+                                onSearchSubmit={handleSearch}
+                            />
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -76,27 +78,14 @@ export default function Index({records}) {
                                         <TableCell>{record.title}</TableCell>
                                         <TableCell>{record.description}</TableCell>
                                         <TableCell>{record.unit_price}</TableCell>
+                                        <TableCell>{format(new Date(record.created_at), 'dd/MM/yyyy')}</TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button variant="ghost">
                                                 <Link href={`/services/${record.id}/edit`}>
                                                     <Edit className={'text-yellow-800'} />
                                                 </Link>
                                             </Button>
-                                            <form
-                                                method="POST"
-                                                action={`/services/${record.id}`}
-                                                onSubmit={(e) => {
-                                                    e.preventDefault();
-                                                    if (confirm('Are you sure?')) {
-                                                        Inertia.delete(`/services/${record.id}`);
-                                                    }
-                                                }}
-                                                className="inline"
-                                            >
-                                                <Button size={'icon'} variant="ghost" type="submit">
-                                                    <Trash className={'text-red-800'} />
-                                                </Button>
-                                            </form>
+                                            <DeleteEntityDialog url={`/services/${record.id}`} />
                                         </TableCell>
                                     </TableRow>
                                 ))}

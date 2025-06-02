@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Client extends Model
 {
     protected $appends = ['full_name', 'address'];
-    protected $fillable = ['first_name', 'last_name', 'company_name', 'phone', 'email'];
+    protected $fillable = ['user_id', 'first_name', 'last_name', 'company_name', 'phone', 'email'];
 
     public function properties()
     {

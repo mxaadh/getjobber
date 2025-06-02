@@ -62,7 +62,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,contractor,employee',
+            'role' => 'required|in:admin,contractor,employee,client',
         ]);
 
         $user = User::create([
@@ -105,10 +105,29 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'role' => 'required|in:admin,contractor,employee,client',
         ]);
 
         $user->update($validated);
+
+        // Update or create user details
+        if ($user->userDetail) {
+            $user->userDetail->update([
+                'phone' => $validated['phone'] ?? null,
+                'country' => $validated['country'] ?? null,
+                'state' => $validated['state'] ?? null,
+                'city' => $validated['city'] ?? null,
+            ]);
+        } else {
+            UserDetail::create([
+                'user_id' => $user->id,
+                'phone' => $validated['phone'] ?? null,
+                'country' => $validated['country'] ?? null,
+                'state' => $validated['state'] ?? null,
+                'city' => $validated['city'] ?? null,
+            ]);
+        }
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }

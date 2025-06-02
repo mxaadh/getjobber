@@ -53,8 +53,12 @@
 <div class="action-buttons">
     <p>Please click below to approve or reject this quotation:</p>
 
-    <a href="{{ $approveUrl }}" class="btn btn-approve">Approve Quotation</a>
-    <a href="{{ $rejectUrl }}" class="btn btn-reject">Reject Quotation</a>
+    @if($approveUrl == $rejectUrl)
+        <a href="{{ $approveUrl }}" class="btn btn-approve">Approve or Reject Quotation</a>
+    @else
+        <a href="{{ $approveUrl }}" class="btn btn-approve">Approve Quotation</a>
+        <a href="{{ $rejectUrl }}" class="btn btn-reject">Reject Quotation</a>
+    @endif
 
     <p style="margin-top: 20px; font-size: 0.9em; color: #666;">
         Or copy and paste these links in your browser:<br>

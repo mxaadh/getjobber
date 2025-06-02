@@ -7,7 +7,7 @@ import { CalendarIcon, Plus, TrashIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link, useForm } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import {
     Select,
     SelectContent,
@@ -17,14 +17,15 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 
 export default function BookingForm({ title, clients, edit }: { title?: string, clients: any[], edit?: any }) {
-    console.log(edit);
+    const { auth } = usePage().props;
+    const { user } = auth;
     const { data, setData, post, reset } = useForm({
         client_id: '',
-        client_name: '',
+        client_name: user.name || '',
         title: '',
         cleaning_services: [],
         details: '',
@@ -33,25 +34,24 @@ export default function BookingForm({ title, clients, edit }: { title?: string, 
         arrival_times: [],
         internal_notes: '',
         items: [
-            { name: "", description: "", quantity: 1, unit_price: 0, total: 0 }
+            { name: '', description: '', quantity: 1, unit_price: 0, total: 0 }
         ],
         subtotal: 0,
         discount: 0,
         tax_rate: 10,
         tax: 0,
         total: 0,
-        deposit_required: 0,
+        deposit_required: 0
     });
 
-
     const addLineItem = () => {
-        setData("items", [...data.items, { name: "", description: "", quantity: 1, unit_price: 0, total: 0 }]);
+        setData('items', [...data.items, { name: '', description: '', quantity: 1, unit_price: 0, total: 0 }]);
     };
 
     const removeLineItem = (index: number) => {
         if (data.items.length <= 1) return;
         const updatedItems = data.items.filter((_, i) => i !== index);
-        setData("items", updatedItems);
+        setData('items', updatedItems);
         recalculate();
     };
 
@@ -64,7 +64,7 @@ export default function BookingForm({ title, clients, edit }: { title?: string, 
             updatedItems[index].total = updatedItems[index].quantity * updatedItems[index].unit_price;
         }
 
-        setData("items", updatedItems);
+        setData('items', updatedItems);
         recalculate();
     };
 
@@ -79,7 +79,7 @@ export default function BookingForm({ title, clients, edit }: { title?: string, 
             ...data,
             subtotal,
             tax: taxAmount,
-            total,
+            total
         });
     };
 
@@ -97,34 +97,56 @@ export default function BookingForm({ title, clients, edit }: { title?: string, 
         });
     };
 
+    useEffect(() => {
+        if (user.role == 'client') {
+            const clientData = clients.find(c => c.user_id === user.id);
+
+            if (clientData) {
+                setData({
+                    ...data,
+                    client_id: clientData.id,
+                    client_name: `${clientData.id} - ${clientData.full_name}`
+                });
+            }
+
+        }
+    }, [user.role, user.id, clients]);
+
     return (
         <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto p-6">
             <div className="flex items-center justify-start gap-4">
                 <h2 className="text-2xl font-bold">{title ?? 'Request for'}</h2>
 
-                <div className="w-full max-w-sm"> {/* You can control the max width here */}
-                    <Select onValueChange={(value) => setData('client_name', value)}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a Client" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Clients</SelectLabel>
-                                {clients.map((client) => <SelectItem key={client.id}
-                                                                     value={client.id + ' - ' + client.full_name}>{client.full_name}</SelectItem>)}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
+                {user.role !== 'client' ? (
+                    <>
+                        <div className="w-full max-w-sm"> {/* You can control the max width here */}
+                            <Select onValueChange={(value) => setData('client_name', value)}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select a Client" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Clients</SelectLabel>
+                                        {clients.map((client) => <SelectItem key={client.id}
+                                                                             value={client.id + ' - ' + client.full_name}>{client.full_name}</SelectItem>)}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                <p>OR</p>
+                        <p>OR</p>
 
-                <Button className="p-2">
-                    <Link href={'/clients/create'} className="flex items-center gap-1">
-                        <Plus />
-                        New Client
-                    </Link>
-                </Button>
+                        <Button className="p-2" >
+                            <Link href={'/clients/create'} className="flex items-center gap-1">
+                                <Plus />
+                                New Client
+                            </Link>
+                        </Button>
+                    </>
+                ) : (
+                    <h2 className="text-3xl font-bold">{user.name}</h2>
+                )}
+
             </div>
 
             {/*Cleaning Services*/}

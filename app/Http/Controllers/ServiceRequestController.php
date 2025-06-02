@@ -69,7 +69,7 @@ class ServiceRequestController extends Controller
                         Carbon::now() // current time
                     ]);
                     break;
-                case 'All%20Requests':
+                case 'All Requests':
                     $query->all();
                     break;
                 // Add other custom filter cases as needed
@@ -219,6 +219,7 @@ class ServiceRequestController extends Controller
             $serviceRequest->update([
                 'status' => ServiceRequest::STATUS_ACTIVE,
                 'quote_amount' => $validated['total'],
+                'deposit_amount' => $validated['deposit_required'] ?? 0,
             ]);
 
             $quote = BookingQuote::create([
@@ -334,7 +335,11 @@ class ServiceRequestController extends Controller
     public function checkout(Request $request, $id)
     {
         $service = ServiceRequest::where('id', $id)->first();
-        $unit_amount = intval(round(floatval($service->quote_amount) * 100)); // convert to integer cents
+        
+        if(isset($service->deposit_amount) && $service->deposit_amount > 0)
+            $unit_amount = intval(round(floatval($service->deposit_amount) * 100)); // convert to integer cents
+        else
+            $unit_amount = intval(round(floatval($service->quote_amount) * 100)); // convert to integer cents
 
         Stripe::setApiKey(config('services.stripe.secret'));
 

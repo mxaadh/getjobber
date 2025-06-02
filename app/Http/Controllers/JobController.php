@@ -15,12 +15,18 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
+use Auth;
 
 class JobController extends Controller
 {
     public function index()
     {
         $query = Job::with('client')->latest();
+
+        if (Auth::user()->isContractor()) {
+            $query = $query->where('contractor_id', Auth::id());
+        }
+
         $all_count = Job::count();
         $approved_count = Job::where('status', Job::STATUS_APPROVED)->count();
         $pending_count = Job::whereNot('status', Job::STATUS_APPROVED)->count();
@@ -175,6 +181,7 @@ class JobController extends Controller
 
         $pricingData = [
             'id' => $price->id,
+            'job_id' => $request['job_id'],
             'quotation_number' => 'QT-' . date('Ymd') . rand(100, 999),
             'customer_name' => $contractor_name,
             'customer_email' => $contractor_email,

@@ -25,14 +25,16 @@ class PricingMail extends Mailable
     public function __construct($quotationData)
     {
         $this->quotationData = $quotationData;
-        $this->approveUrl = route('prices.approve', [
-            'price' => $quotationData['id'], // Changed from $this->quotationData
-            'token' => $this->generateToken($quotationData['id'], 'approve')
-        ]);
-        $this->rejectUrl = route('prices.reject', [
-            'price' => $quotationData['id'], // Changed from $this->quotationData
-            'token' => $this->generateToken($quotationData['id'], 'reject')
-        ]);
+        $this->approveUrl = route('jobs.show', $quotationData['job_id']);
+        $this->rejectUrl = route('jobs.show', $quotationData['job_id']);
+//        $this->approveUrl = route('prices.approve', [
+//            'price' => $quotationData['id'], // Changed from $this->quotationData
+//            'token' => $this->generateToken($quotationData['id'], 'approve')
+//        ]);
+//        $this->rejectUrl = route('prices.reject', [
+//            'price' => $quotationData['id'], // Changed from $this->quotationData
+//            'token' => $this->generateToken($quotationData['id'], 'reject')
+//        ]);
     }
 
 

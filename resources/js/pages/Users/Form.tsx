@@ -94,6 +94,7 @@ export function UserForm({
                                 <SelectItem value="admin">Admin</SelectItem>
                                 <SelectItem value="employee">Employee</SelectItem>
                                 <SelectItem value="contractor">Contractor</SelectItem>
+                                <SelectItem value="client">Client</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.role && <div className="text-red-500 text-xs">{errors.role}</div>}

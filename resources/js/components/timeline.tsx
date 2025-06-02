@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { CircleSmall } from 'lucide-react';
+import { CircleSmall, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm, usePage } from '@inertiajs/react';
 import { SharedData } from '@/types';
+import {Link} from '@inertiajs/react';
 
 function StatusBadge({ quote }) {
     const status = {
@@ -36,7 +37,8 @@ function StatusBadge({ quote }) {
     );
 }
 
-export function BookingTimeline({ quotes }) {
+export function BookingTimeline({ quotes, deposit}) {
+    console.log(quotes);
     const { auth } = usePage<SharedData>().props;
     const { role } = auth.user;
 
@@ -81,7 +83,7 @@ export function BookingTimeline({ quotes }) {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-3 gap-5 pt-4">
+                                <div className="grid grid-cols-4 gap-5 pt-4">
                                     <div>
                                         <p className="text-xs text-muted-foreground">Booking ID</p>
                                         <p className="font-medium">#{quote.booking_id}</p>
@@ -92,6 +94,14 @@ export function BookingTimeline({ quotes }) {
                                             ${parseFloat(quote.quote_amount).toFixed(2)}
                                         </p>
                                     </div>
+                                    {deposit && (
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">Deposit</p>
+                                            <p className="font-medium">
+                                                ${parseFloat(deposit).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    )}
                                     <div>
                                         <p className="text-xs text-muted-foreground">
                                             {quote.is_approved
@@ -117,6 +127,17 @@ export function BookingTimeline({ quotes }) {
                                         </div>
                                     )}
                                 </div>
+
+                                {quote.is_approved && (
+                                    <div className={'mt-2'}>
+                                        <Button>
+                                            <Link href={`/requests/checkout/${quote.booking_id}/`}
+                                                  className="flex items-center gap-1 m-2">
+                                                <ExternalLink /> Pay Now
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                )}
 
                                 {!quote.is_approved && !quote.is_rejected && (
                                     <div className="mt-4 flex flex-col gap-2">

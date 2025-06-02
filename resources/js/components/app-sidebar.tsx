@@ -24,14 +24,14 @@ const mainNavItems: NavItem[] = [
 
 ];
 
-const bookingNavItems: NavItem[] = [
+let midNavItems: NavItem[] = [
     {
         title: 'Clients',
         href: '/clients',
         icon: ContactRound
     },
     {
-        title: 'Reuquests',
+        title: 'Requests',
         href: '/requests',
         icon: ArchiveRestore
     },
@@ -69,6 +69,27 @@ export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const { role } = auth.user;
 
+    console.log(role, "<< role");
+
+    if (role == 'client') {
+        midNavItems = [
+            {
+                title: 'Requests',
+                href: '/requests',
+                icon: ArchiveRestore
+            },
+        ]
+    } else if (role == 'contractor') {
+        midNavItems = [
+            {
+                title: 'Jobs',
+                href: '/jobs',
+                icon: Briefcase
+            },
+        ];
+
+    }
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -85,7 +106,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                <NavMain platform={'Booking'} items={bookingNavItems} />
+                <NavMain platform={'Booking'} items={midNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

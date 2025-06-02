@@ -30,6 +30,7 @@ class ServiceRequest extends Model
         'cleaning_services',
         'internal_notes',
         'quote_amount',
+        'deposit_amount',
     ];
 
     protected $casts = [

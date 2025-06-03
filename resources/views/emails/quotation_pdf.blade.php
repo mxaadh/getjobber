@@ -84,7 +84,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <div class="logo-placeholder"><img src="public/logo.jpg"></div>
+        <div class="logo-placeholder"><img src="https://white-owl-939475.hostingersite.com/logo.png"></div>
         <div class="status">Status: Unpaid</div>
     </div>
 

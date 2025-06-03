@@ -149,7 +149,7 @@ export default function show({
 
 
     };
-    const allItemsChecked = priceItem.items?.length > 0 && priceItem.items.every((item: any) => checkedItems[item.id]);
+    const allItemsChecked = priceItem?.items?.length > 0 && priceItem.items.every((item: any) => checkedItems[item.id]);
 
 
     const handleSubmit = (e: React.FormEvent) => {

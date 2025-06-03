@@ -19,7 +19,7 @@ export default function StatsOverview({stats, _route}) {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {
                 stats.map((stat, index) => (
-                    <Card key={index} onClick={handleClick(stat.title)}>
+                    <Card key={index} onClick={handleClick(stat.title)} className={'hover:bg-green-200'}>
                         <CardHeader>
                             <CardTitle>{stat.title}</CardTitle>
                             <CardDescription>{stat.description}</CardDescription>

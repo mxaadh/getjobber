@@ -1,8 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import PageHeadingButtons from '@/components/page-heading-buttons';
 import { Button } from '@/components/ui/button';
 import { Edit, EyeIcon, Filter, Plus, Search, Trash } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import StatsOverview from '@/components/StatsOverview';
@@ -28,6 +28,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { StatusBadge } from '@/components/status-badge';
 import { PaginationComponent } from '@/components/pagination-component';
+import { toast } from 'react-hot-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,6 +38,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Index({ jobs, all_count, month_count, week_count, approved_count, pending_count }: any) {
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        // rest of your code
+        if (flash?.success) {
+            toast.success(flash.success);
+        } else if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Requests" />
@@ -175,7 +187,7 @@ export default function Index({ jobs, all_count, month_count, week_count, approv
                                         {/*<TableCell>{job.arrival_times}</TableCell>*/}
                                         <TableCell>{format(new Date(job.schedule_date), 'dd/MM/yyyy')}</TableCell>
                                         <TableCell>{job.total_price}</TableCell>
-                                        <TableCell><StatusBadge  status={job.status}/></TableCell>
+                                        <TableCell><StatusBadge status={job.status} /></TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button size={'icon'} variant={'ghost'}>
                                                 <Link href={`/jobs/${job.id}`}>

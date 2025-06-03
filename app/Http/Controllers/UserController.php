@@ -17,24 +17,46 @@ class UserController extends Controller
     public function index(Request $request)
     {
 //        employee_count, contractor_count, client_count
-        $query = User::latest();
+        $query = User::whereNot('role', User::ROLE_CLIENT)->latest();
         $employee_count = User::where('role', User::ROLE_EMPLOYEE)->count();
         $contractor_count = User::where('role', User::ROLE_CONTRACTOR)->count();
-        $client_count = User::where('role', User::ROLE_CLIENT)->count();
+        $admin_count = User::where('role', User::ROLE_ADMIN)->count();
+        $all_count = User::whereNot('role', User::ROLE_CLIENT)->count();
 
         // Search functionality
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhereHas('userDetail', function($r) use ($search) {
-                      $r->where('phone', 'like', "%{$search}%")
-                        ->orWhere('country', 'like', "%{$search}%")
-                        ->orWhere('state', 'like', "%{$search}%")
-                        ->orWhere('city', 'like', "%{$search}%");
-                  });
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('userDetail', function ($r) use ($search) {
+                        $r->where('phone', 'like', "%{$search}%")
+                            ->orWhere('country', 'like', "%{$search}%")
+                            ->orWhere('state', 'like', "%{$search}%")
+                            ->orWhere('city', 'like', "%{$search}%");
+                    });
             });
+        }
+
+        // Filter functionality
+        if ($request->has('filter') && !empty($request->filter)) {
+            // Handle custom filters or fallback
+            switch ($request->filter) {
+                case 'Employees':
+                    $query->where('role', User::ROLE_EMPLOYEE);
+                    break;
+                case 'Contractors':
+                    // Special case where status is not approved
+                    $query->where('role', User::ROLE_CONTRACTOR);
+                    break;
+                case 'Admins':
+                    $query->where('role', User::ROLE_ADMIN);
+                    break;
+                case 'All Users':
+                    $query->whereNot('role', User::ROLE_CLIENT);
+                    break;
+                // Add other custom filter cases as needed
+            }
         }
 
         $users = $query->paginate(10);
@@ -43,7 +65,8 @@ class UserController extends Controller
             'users' => $users,
             'employee_count' => $employee_count,
             'contractor_count' => $contractor_count,
-            'client_count' => $client_count,
+            'admin_count' => $admin_count,
+            'all_count' => $all_count,
             'searchQuery' => $request->search,
         ]);
     }
@@ -105,7 +128,7 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
+            'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,contractor,employee,client',
         ]);
 

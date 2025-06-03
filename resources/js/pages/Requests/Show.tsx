@@ -9,7 +9,16 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { BookingTimeline } from '@/components/timeline';
 import { format } from 'date-fns';
-import { Edit, GitCommitVertical, LocateIcon, PhoneCall, TrashIcon, ExternalLink, Trash } from 'lucide-react';
+import {
+    Edit,
+    GitCommitVertical,
+    LocateIcon,
+    PhoneCall,
+    TrashIcon,
+    ExternalLink,
+    Trash,
+    CircleSmall
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
     Select,
@@ -23,18 +32,21 @@ import {
 import { SharedData } from '@/types';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Bookings', href: '/requests' },
     { title: 'Booking Detail', href: '#' }
 ];
 
-export default function Show({ request, quotes, approvedQuotes, services }: {
+export default function Show({ request, quotes, approvedQuotes, services, checkQuotePending }: {
     request: any;
     quotes: any;
     approvedQuotes: any;
     services: any[]
+    checkQuotePending: boolean
 }) {
+    console.log(request, 'request data');
     const { auth } = usePage<SharedData>().props;
     const { role } = auth.user;
 
@@ -61,17 +73,26 @@ export default function Show({ request, quotes, approvedQuotes, services }: {
         tax_rate: 10,
         tax: 0,
         total: 0,
-        deposit_required: 0
+        deposit_required: 0,
+        deposit_required_amount: 1
     });
     const [showDiscoutn, setShowDiscount] = React.useState(false);
     const [addTax, setAddTax] = React.useState(false);
 
     const recalculate = (items = data.items, discount = data.discount) => {
+        let total = 0;
+        let taxAmount = 0;
+
         const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+        total = subtotal;
+
         const discountAmount = discount || 0;
-        const taxableAmount = subtotal - discountAmount;
-        const taxAmount = taxableAmount * (data.tax_rate / 100);
-        const total = taxableAmount + taxAmount;
+        total -= discountAmount;
+
+        if (addTax) {
+            taxAmount = total * (data.tax_rate / 100);
+            total = total + taxAmount;
+        }
 
         setData(prev => ({
             ...prev,
@@ -168,177 +189,249 @@ export default function Show({ request, quotes, approvedQuotes, services }: {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {['admin', 'employee'].includes(role) && (
                         <>
-                            <Card>
-                                <CardHeader><CardTitle>Services</CardTitle></CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {data.items.map((item, index) => (
-                                            <div key={index} className="grid grid-cols-12 gap-4 items-end">
-                                                <div className="col-span-5 space-y-2">
-                                                    <Label>Product</Label>
-                                                    <Select
-                                                        onValueChange={(value) => handleSelectValueChange(value, index)}>
-                                                        <SelectTrigger><SelectValue
-                                                            placeholder="Select a service" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectGroup>
-                                                                <SelectLabel>Service</SelectLabel>
-                                                                {services.map((service) => (
-                                                                    <SelectItem key={service.id}
-                                                                                value={service.id.toString()}>
-                                                                        {service.title}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectGroup>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="col-span-2 space-y-2">
-                                                    <Label>Unit Price</Label>
-                                                    <Input type="number" value={item.unit_price}
-                                                           onChange={(e) => updateItem(index, { unit_price: parseFloat(e.target.value) || 0 })} />
-                                                </div>
-                                                <div className="col-span-2 space-y-2">
-                                                    <Label>Qty.</Label>
-                                                    <Input type="number" value={item.quantity}
-                                                           onChange={(e) => updateItem(index, { quantity: parseInt(e.target.value) || 0 })} />
-                                                </div>
-                                                <div className="col-span-2 space-y-2">
-                                                    <Label>Total</Label>
-                                                    <Input type="number" value={item.total.toFixed(2)} readOnly />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <Button type="button" variant="ghost" size="icon"
-                                                            onClick={() => removeLineItem(index)}
-                                                            disabled={data.items.length <= 1}>
-                                                        <TrashIcon className="h-4 w-4" />
-                                                    </Button>
+                            {checkQuotePending && (
+                                <>
+                                    <Card>
+                                        <CardHeader><CardTitle>Services</CardTitle></CardHeader>
+                                        <CardContent>
+                                            <div className="space-y-4">
+                                                {data.items.map((item, index) => (
+                                                    <div key={index} className="grid grid-cols-12 gap-4 items-end">
+                                                        <div className="col-span-5 space-y-2">
+                                                            <Label>Product</Label>
+                                                            <Select
+                                                                onValueChange={(value) => handleSelectValueChange(value, index)}>
+                                                                <SelectTrigger><SelectValue
+                                                                    placeholder="Select a service" /></SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectGroup>
+                                                                        <SelectLabel>Service</SelectLabel>
+                                                                        {services.map((service) => (
+                                                                            <SelectItem key={service.id}
+                                                                                        value={service.id.toString()}>
+                                                                                {service.title}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectGroup>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="col-span-2 space-y-2">
+                                                            <Label>Unit Price</Label>
+                                                            <Input type="number" value={item.unit_price}
+                                                                   onChange={(e) => updateItem(index, { unit_price: parseFloat(e.target.value) || 0 })} />
+                                                        </div>
+                                                        <div className="col-span-2 space-y-2">
+                                                            <Label>Qty.</Label>
+                                                            <Input type="number" value={item.quantity}
+                                                                   onChange={(e) => updateItem(index, { quantity: parseInt(e.target.value) || 0 })} />
+                                                        </div>
+                                                        <div className="col-span-2 space-y-2">
+                                                            <Label>Total</Label>
+                                                            <Input type="number" value={item.total.toFixed(2)}
+                                                                   readOnly />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <Button type="button" variant="ghost" size="icon"
+                                                                    onClick={() => removeLineItem(index)}
+                                                                    disabled={data.items.length <= 1}>
+                                                                <TrashIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <Button type="button" variant="outline" onClick={addLineItem}
+                                                        className="w-full">
+                                                    Add Line Item
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    <Card>
+                                        <CardHeader><CardTitle>Quote Summary</CardTitle></CardHeader>
+                                        <CardContent className="grid gap-2">
+                                            <div className="flex justify-between">
+                                                <span>Subtotal</span>
+                                                <span>${data.subtotal.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center space-y-5">
+                                                <span>Discount</span>
+                                                {showDiscoutn && (
+                                                    <Input type="number" className="w-24" value={data.discount}
+                                                           min={0}
+                                                           onChange={handleDiscountChange} />
+                                                )}
+                                                <div className="flex items-center gap-2">
+                                                    {showDiscoutn ? (
+                                                        <span>
+                                                            <Button size="icon" variant="ghost"
+                                                                    onClick={() => {
+                                                                        setShowDiscount(false);
+                                                                        recalculate(data.items, 0);
+                                                                    }}>
+                                                                <Trash
+                                                                    className="text-red-800" />
+                                                            </Button>
+                                                            <span>-${data.discount.toFixed(2)}</span>
+                                                        </span>
+                                                    ) : (
+                                                        <b onClick={() => setShowDiscount(true)}
+                                                           className={'cursor-pointer'}>Add
+                                                            Discount</b>
+                                                    )}
                                                 </div>
                                             </div>
-                                        ))}
-                                        <Button type="button" variant="outline" onClick={addLineItem}
-                                                className="w-full">
-                                            Add Line Item
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                            <div className="flex justify-between items-center">
+                                                <span>Tax</span>
 
-                            <Card>
-                                <CardHeader><CardTitle>Quote Summary</CardTitle></CardHeader>
-                                <CardContent className="grid gap-2">
-                                    <div className="flex justify-between">
-                                        <span>Subtotal</span>
-                                        <span>${data.subtotal.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center space-y-5">
-                                        <span>Discount</span>
-                                        {showDiscoutn && (
-                                            <Input type="number" className="w-24" value={data.discount}
-                                                   min={0}
-                                                   onChange={handleDiscountChange} />
-                                        )}
-                                        <div className="flex items-center gap-2">
-                                            {showDiscoutn ? (
-                                                <span>
-                                                    <Button size="icon" variant="ghost"
-                                                            onClick={() => setShowDiscount(false)}><Trash
-                                                        className="text-red-800" /></Button>
-                                                    <span>-${data.discount.toFixed(2)}</span>
-                                                </span>
-                                            ) : (
-                                                <b onClick={() => setShowDiscount(true)} className={'cursor-pointer'}>Add
-                                                    Discount</b>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span>Tax</span>
+                                                {addTax && (
+                                                    <div className={'flex justify-between align-middle gap-5 w-32'}>
+                                                        <Input
+                                                            className="w-24"
+                                                            type="number"
+                                                            min={0}
+                                                            value={data.tax_rate}
+                                                            onChange={(e) => {
+                                                                const newRate = parseFloat(e.target.value) || 0;
+                                                                setData(prev => ({ ...prev, tax_rate: newRate }));
+                                                                recalculate(data.items, data.discount);
+                                                            }}
+                                                        />
+                                                        %
+                                                    </div>
+                                                )}
 
-                                        {addTax && (
-                                            <Input
-                                                type="number"
-                                                className="w-24"
-                                                min={0}
-                                                value={data.tax_rate}
-                                                onChange={(e) => {
-                                                    const newRate = parseFloat(e.target.value) || 0;
-                                                    setData(prev => ({ ...prev, tax_rate: newRate }));
-                                                    recalculate(data.items, data.discount);
-                                                }}
-                                            />
-                                        )}
+                                                {addTax ? (
+                                                    <span className="flex items-center gap-2">
+                                                      <Button
+                                                          size="icon"
+                                                          variant="ghost"
+                                                          onClick={() => {
+                                                              setAddTax(false);
+                                                              setData(prev => ({ ...prev, tax_rate: 0 }));
+                                                              recalculate(data.items, data.discount);
+                                                          }}
+                                                      >
+                                                        <Trash className="text-red-800" />
+                                                      </Button>
+                                                      <span>${data.tax.toFixed(2)}</span>
+                                                    </span>
+                                                ) : (
+                                                    <b
+                                                        onClick={() => {
+                                                            setAddTax(true);
+                                                            setData(prev => ({ ...prev, tax_rate: 10 })); // Default to 10% when enabling
+                                                            recalculate(data.items, data.discount);
+                                                        }}
+                                                        className="cursor-pointer"
+                                                    >
+                                                        Add Tax
+                                                    </b>
+                                                )}
+                                            </div>
 
-                                        {addTax ? (
-                                            <span className="flex items-center gap-2">
-                                              <Button
-                                                  size="icon"
-                                                  variant="ghost"
-                                                  onClick={() => {
-                                                      setAddTax(false);
-                                                      setData(prev => ({ ...prev, tax_rate: 0 }));
-                                                      recalculate(data.items, data.discount);
-                                                  }}
-                                              >
-                                                <Trash className="text-red-800" />
-                                              </Button>
-                                              <span>${data.tax.toFixed(2)}</span>
-                                            </span>
-                                        ) : (
-                                            <b
-                                                onClick={() => {
-                                                    setAddTax(true);
-                                                    setData(prev => ({ ...prev, tax_rate: 10 })); // Default to 10% when enabling
-                                                    recalculate(data.items, data.discount);
-                                                }}
-                                                className="cursor-pointer"
-                                            >
-                                                Add Tax
-                                            </b>
-                                        )}
-                                    </div>
-                                    <Separator />
-                                    <div className="flex justify-between font-bold">
-                                        <span>Total</span>
-                                        <span>${data.total.toFixed(2)}</span>
-                                    </div>
-                                    <Separator />
+                                            <Separator />
+                                            <div className="flex justify-between font-bold">
+                                                <span>Total</span>
+                                                <span>${data.total.toFixed(2)}</span>
+                                            </div>
+                                            <Separator />
 
-                                    <div className="flex justify-between items-center mt-4">
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id="deposit"
-                                                checked={data.deposit_required > 0}
-                                                onCheckedChange={(checked) => handleCheckedChange(!!checked)}
-                                            />
-                                            <Label htmlFor="deposit">
-                                                Required deposit (20%)
-                                            </Label>
-                                        </div>
-                                        <span>${(data.deposit_required || data.total * 0.2).toFixed(2)}</span>
-                                    </div>
+                                            <div className="flex justify-between items-center mt-4">
+                                                <div className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id="deposit"
+                                                        checked={data.deposit_required > 0}
+                                                        onCheckedChange={(checked) => handleCheckedChange(!!checked)}
+                                                    />
+                                                    <Label htmlFor="deposit">
+                                                        Required deposit
+                                                    </Label>
+                                                </div>
 
-                                    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                                        <Label htmlFor="quote-amount">Quote amount</Label>
-                                        <Input
-                                            id="quote-amount"
-                                            type="text"
-                                            placeholder="Enter Quote Amount"
-                                            value={data.total.toFixed(2)}
-                                            readOnly={true}
-                                        />
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="outline">
-                                                <Link href={'/requests'}>Cancel</Link>
-                                            </Button>
-                                            <Button type="submit" disabled={approvedQuotes}>Send Quote</Button>
-                                        </div>
-                                    </form>
-                                </CardContent>
-                            </Card>
+                                                {data.deposit_required && (
+                                                    <div className={'flex items-center gap-2'}>
+                                                        <Input
+                                                            type="number"
+                                                            className="w-24"
+                                                            min={0}
+                                                            value={data.deposit_required_amount}
+                                                            onChange={(e) => {
+                                                                console.log(e.target.value, "<< value");
+                                                            }}
+                                                        />
+                                                        %
+                                                        <span>${(data.deposit_required || data.total * data.deposit_required_amount).toFixed(2)}</span>
+                                                    </div>
+                                                )}
+
+                                            </div>
+
+                                            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+                                                <Label htmlFor="quote-amount">Quote amount</Label>
+                                                <Input
+                                                    id="quote-amount"
+                                                    type="text"
+                                                    placeholder="Enter Quote Amount"
+                                                    value={data.total.toFixed(2)}
+                                                    readOnly={true}
+                                                />
+                                                <div className="flex justify-end gap-2">
+                                                    <Button variant="outline">
+                                                        <Link href={'/requests'}>Cancel</Link>
+                                                    </Button>
+                                                    <Button type="submit" disabled={approvedQuotes}>Send Quote</Button>
+                                                </div>
+                                            </form>
+                                        </CardContent>
+                                    </Card>
+                                </>
+                            )}
                         </>
                     )}
-
+                </div>
+                <div className={'space-y-5'}>
+                    {(request.is_paid !== 0) && (
+                        <div className="flex items-start gap-4">
+                            <div className="flex flex-col items-center">
+                                <Avatar className="h-9 w-9">
+                                    <AvatarFallback><CircleSmall /></AvatarFallback>
+                                </Avatar>
+                                <div className="w-px bg-gray-200 h-full mt-2" />
+                            </div>
+                            <div className="flex-1">
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">
+                                            Deposit payments
+                                        </CardTitle>
+                                        <Badge>Piad</Badge>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-4 gap-5 pt-4">
+                                            {request.deposit_amount && (
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">Amount</p>
+                                                    <p className="font-medium">
+                                                        ${parseFloat(request.deposit_amount).toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {request.paid_at && (
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">Payment Date</p>
+                                                    <p className="font-medium">
+                                                        {request.paid_at}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+                    )}
                     <BookingTimeline quotes={quotes} deposit={request.deposit_amount} />
                 </div>
             </div>

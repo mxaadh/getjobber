@@ -92,12 +92,33 @@ class JobController extends Controller
         $contractors = User::where('role', 'contractor')->whereIn('id', $user_ids)->get();
         $price = JobPrice::with('items')->where('service_job_id', $job->id)->orderBy('created_at', 'desc')->get();
         $services = Service::all();
+        $asignedContractor = $job->contractor_id ? User::with('userDetail')->find($job->contractor_id) : null;
+
+        $checkQuotePending = false;
+        if ($price->count() === 0) {
+            $checkQuotePending = true;
+        } else {
+            $checkQuotePending = ($price->first()?->is_approved || $price->first()?->is_rejected) ? true : false;
+        }
+
+        $prePhotos = $job->photos()->where('type', 'pre')->get();
+        $postPhotos = $job->photos()->where('type', 'post')->get();
+
+        $priceItem = JobPrice::with('items')->where([
+            'service_job_id' => $job->id,
+            'is_approved' => true,
+        ])->orderBy('created_at', 'desc')->first();
 
         return Inertia::render('Jobs/Show', [
             'job' => $job->load(['contractor', 'client', 'serviceRequest', 'quote']),
             'contractors' => $contractors,
             'price' => $price,
             'services' => $services,
+            'checkQuotePending' => $checkQuotePending,
+            'asignedContractor' => $asignedContractor,
+            'prePhotos' => $prePhotos,
+            'postPhotos' => $postPhotos,
+            'priceItem' => $priceItem,
         ]);
     }
 
@@ -298,7 +319,7 @@ class JobController extends Controller
             ]);
         }
 
-        return redirect()->route('jobs.start', $job)->with('success', 'Pre-photos uploaded.');
+        return redirect()->route('jobs.show', $job)->with('success', 'Pre-photos uploaded.');
     }
 
     public function complete(Job $job)
@@ -327,7 +348,7 @@ class JobController extends Controller
             ]);
         }
 
-        return redirect()->route('jobs.complete', $job)->with('success', 'Post-photos uploaded.');
+        return redirect()->route('jobs.show', $job)->with('success', 'Post-photos uploaded.');
     }
 
     public function finish(Job $job)

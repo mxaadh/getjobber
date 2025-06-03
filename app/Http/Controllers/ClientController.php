@@ -188,6 +188,16 @@ class ClientController extends Controller
             'country' => $validated['country'],
         ]);
 
+        $user_detail = UserDetail::where('user_id', $client->user_id)->first();
+        if ($user_detail) {
+            $user_detail->update([
+                'phone' => $validated['phone'],
+                'country' => $validated['country'],
+                'state' => $validated['state'],
+                'city' => $validated['city'],
+            ]);
+        }
+
         return redirect()->route('clients.index')->with('success', 'Client updated successfully.');
     }
 
@@ -196,6 +206,20 @@ class ClientController extends Controller
      */
     public function destroy($id)
     {
+        $client = Client::findOrFail($id);
+
+        // Check if client has service requests (prevent deletion if true)
+        if ($client->serviceRequests()->count() > 0) {
+            return back()->with('error', 'Cannot delete client with existing service requests.');
+        }
+
+        // Delete associated properties
+        $client->properties()->delete();
+        // Delete the user details
+        UserDetail::where('user_id', $client->user_id)->delete();
+        // Delete the user
+        User::where('id', $client->user_id)->delete();
+        // Finally, delete the client
         Client::destroy($id);
 
         return redirect()->route('clients.index')->with('success', 'User deleted successfully.');

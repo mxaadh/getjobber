@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
+import { SharedData } from '@/types';
 import PageHeadingButtons from '@/components/page-heading-buttons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,11 +19,13 @@ import {
     SelectValue
 } from '@/components/ui/select';
 import { Timeline } from '@/components/timeline';
-import { Edit, GitCommitVertical, Hammer, LocateIcon, PhoneCall, TrashIcon } from 'lucide-react';
+import { Edit, GitCommitVertical, LocateIcon, PhoneCall, Pickaxe, TrashIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import SelectCountry from '@/components/select-country';
-import { SharedData } from '@/types';
-import { Separator } from "@/components/ui/separator"
+import { Separator } from '@/components/ui/separator';
+import Start from '@/pages/Jobs/Start';
+import Complete from '@/pages/Jobs/Complete';
+import { toast } from 'react-hot-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,12 +38,18 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function show({ job, contractors, price, services }: {
-    job: any,
-    contractors: any,
-    price: any
-}) {
-    const { auth } = usePage<SharedData>().props;
+export default function show({
+                                 job,
+                                 contractors,
+                                 price,
+                                 services,
+                                 checkQuotePending,
+                                 asignedContractor,
+                                 prePhotos,
+                                 postPhotos,
+                                 priceItem
+                             }) {
+    const { auth, flash } = usePage().props;
     const { role } = auth.user;
 
     const initialItems = price.length && price[0].items.length
@@ -67,7 +76,6 @@ export default function show({ job, contractors, price, services }: {
         total: 0,
         deposit_required: 0
     });
-
 
     const recalculate = (items = data.items, discount = data.discount) => {
         const subtotal = items.reduce((sum, item) => sum + item.total, 0);
@@ -135,6 +143,15 @@ export default function show({ job, contractors, price, services }: {
         recalculate(data.items, newDiscount);
     };
 
+    const [checkedItems, setCheckedItems] = useState<{ [key: number]: boolean }>({});
+    const toggleItem = (id: number) => {
+        setCheckedItems((prev) => ({ ...prev, [id]: !prev[id] }));
+
+
+    };
+    const allItemsChecked = priceItem.items?.length > 0 && priceItem.items.every((item: any) => checkedItems[item.id]);
+
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/jobs/price-add', {
@@ -144,7 +161,14 @@ export default function show({ job, contractors, price, services }: {
 
     useEffect(() => {
         recalculate(data.items, data.discount);
-    }, []);
+        // rest of your code
+        if (flash?.success) {
+            console.log('Flash content:', flash);
+            toast.success(flash.success);
+        } else if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -158,119 +182,169 @@ export default function show({ job, contractors, price, services }: {
                         </Link>
                     </Button>
                 </PageHeadingButtons>
-                <JobDetailsCard job={job} approved={price[0]?.is_approved} />
+
+                <JobDetailsCard job={job} approved={price[0]?.is_approved} asignedContractor={asignedContractor} />
+
+                {price[0]?.is_approved && (
+                    <>
+                        {role === 'contractor' && (
+                            <>
+                                {checkQuotePending && (
+                                    <div className={'grid grid-cols-3 gap-5'}>
+                                        <Start job={job} prePhotos={prePhotos} price={priceItem} />
+                                        <div className={'mt-[105px]'}>
+                                            {priceItem.items && priceItem.items.length > 0 && (
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Checklist - Job Items</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <div className="space-y-2">
+                                                            {priceItem.items.map((item: any) => (
+                                                                <label key={item.id}
+                                                                       className="flex items-center space-x-2">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={!!checkedItems[item.id]}
+                                                                        onChange={() => toggleItem(item.id)}
+                                                                    />
+                                                                    <span>{item.quantity} x {item.name}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            )}
+                                        </div>
+                                        <div>
+                                            {(allItemsChecked || job.status === 'completed') &&
+                                                <Complete job={job} postPhotos={postPhotos} />}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {['admin', 'employee'].includes(role) && (
                         <>
-                            <Card>
-                                <CardHeader><CardTitle>Services</CardTitle></CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {data.items.map((item, index) => (
-                                            <div key={index} className="grid grid-cols-12 gap-4 items-end">
-                                                <div className="col-span-5 space-y-2">
-                                                    <Label>Product</Label>
-                                                    <Select
-                                                        onValueChange={(value) => handleSelectValueChange(value, index)}>
-                                                        <SelectTrigger><SelectValue
-                                                            placeholder="Select a service" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectGroup>
-                                                                <SelectLabel>Service</SelectLabel>
-                                                                {services.map((service) => (
-                                                                    <SelectItem key={service.id}
-                                                                                value={service.id.toString()}>
-                                                                        {service.title}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectGroup>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="col-span-2 space-y-2">
-                                                    <Label>Unit Price</Label>
-                                                    <Input type="number" value={item.unit_price}
-                                                           onChange={(e) => updateItem(index, { unit_price: parseFloat(e.target.value) || 0 })} />
-                                                </div>
-                                                <div className="col-span-2 space-y-2">
-                                                    <Label>Qty.</Label>
-                                                    <Input type="number" value={item.quantity}
-                                                           onChange={(e) => updateItem(index, { quantity: parseInt(e.target.value) || 0 })} />
-                                                </div>
-                                                <div className="col-span-2 space-y-2">
-                                                    <Label>Total</Label>
-                                                    <Input type="number" value={item.total.toFixed(2)} readOnly />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <Button type="button" variant="ghost" size="icon"
-                                                            onClick={() => removeLineItem(index)}
-                                                            disabled={data.items.length <= 1}>
-                                                        <TrashIcon className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        <Button type="button" variant="outline" onClick={addLineItem}
-                                                className="w-full">
-                                            Add Line Item
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader><CardTitle>Quote Summary</CardTitle></CardHeader>
-                                <CardContent className="grid gap-2">
-                                    <div className="flex justify-between">
-                                        <span>Subtotal</span>
-                                        <span>${data.subtotal.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span>Tax ({data.tax_rate}%)</span>
-                                        <span>${data.tax.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between font-bold border-t pt-2 mt-2">
-                                        <span>Total</span>
-                                        <span>${data.total.toFixed(2)}</span>
-                                    </div>
-
-                                    <Separator />
-
-                                    <form onSubmit={handleSubmit} className={'space-y-5'}>
-                                        <SelectCountry value={''} job_id={job.id} />
-                                        <Label htmlFor="quote-amount">Select Contractor</Label>
-                                        <Select
-                                            id="contractor"
-                                            className="w-full border rounded-md p-2"
-                                            onValueChange={(value) => setData('contractor_name', value)}>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select a contractor" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {contractors.map((contractor) => (
-                                                    <SelectItem key={contractor.id}
-                                                                value={contractor.id + ' - ' + contractor.name + ' - ' + contractor.email}>
-                                                        {contractor.name}
-                                                    </SelectItem>
+                            {checkQuotePending && (
+                                <>
+                                    <Card>
+                                        <CardHeader><CardTitle>Services</CardTitle></CardHeader>
+                                        <CardContent>
+                                            <div className="space-y-4">
+                                                {data.items.map((item, index) => (
+                                                    <div key={index} className="grid grid-cols-12 gap-4 items-end">
+                                                        <div className="col-span-5 space-y-2">
+                                                            <Label>Product</Label>
+                                                            <Select
+                                                                onValueChange={(value) => handleSelectValueChange(value, index)}>
+                                                                <SelectTrigger><SelectValue
+                                                                    placeholder="Select a service" /></SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectGroup>
+                                                                        <SelectLabel>Service</SelectLabel>
+                                                                        {services.map((service) => (
+                                                                            <SelectItem key={service.id}
+                                                                                        value={service.id.toString()}>
+                                                                                {service.title}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectGroup>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="col-span-2 space-y-2">
+                                                            <Label>Unit Price</Label>
+                                                            <Input type="number" value={item.unit_price}
+                                                                   onChange={(e) => updateItem(index, { unit_price: parseFloat(e.target.value) || 0 })} />
+                                                        </div>
+                                                        <div className="col-span-2 space-y-2">
+                                                            <Label>Qty.</Label>
+                                                            <Input type="number" value={item.quantity}
+                                                                   onChange={(e) => updateItem(index, { quantity: parseInt(e.target.value) || 0 })} />
+                                                        </div>
+                                                        <div className="col-span-2 space-y-2">
+                                                            <Label>Total</Label>
+                                                            <Input type="number" value={item.total.toFixed(2)}
+                                                                   readOnly />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <Button type="button" variant="ghost" size="icon"
+                                                                    onClick={() => removeLineItem(index)}
+                                                                    disabled={data.items.length <= 1}>
+                                                                <TrashIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <Label htmlFor="quote-amount">Job amount</Label>
-                                        <Input
-                                            id="quote-amount"
-                                            type={'text'}
-                                            placeholder="Enter Job Amount"
-                                            value={data.total.toFixed(2)}
-                                            onChange={(e) => setData('job_price', e.target.value)}
-                                        />
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="outline">
-                                                <Link href={'/bookings'}>Cancel</Link>
-                                            </Button>
-                                            <Button type={'submit'}>Send Price to Jobber</Button>
-                                        </div>
-                                    </form>
-                                </CardContent>
-                            </Card>
+                                                <Button type="button" variant="outline" onClick={addLineItem}
+                                                        className="w-full">
+                                                    Add Line Item
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                    <Card>
+                                        <CardHeader><CardTitle>Quote Summary</CardTitle></CardHeader>
+                                        <CardContent className="grid gap-2">
+                                            <div className="flex justify-between">
+                                                <span>Subtotal</span>
+                                                <span>${data.subtotal.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span>Tax ({data.tax_rate}%)</span>
+                                                <span>${data.tax.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between font-bold border-t pt-2 mt-2">
+                                                <span>Total</span>
+                                                <span>${data.total.toFixed(2)}</span>
+                                            </div>
+
+                                            <Separator />
+
+                                            <form onSubmit={handleSubmit} className={'space-y-5'}>
+                                                <SelectCountry value={''} job_id={job.id} />
+                                                <Label htmlFor="quote-amount">Select Contractor</Label>
+                                                <Select
+                                                    id="contractor"
+                                                    className="w-full border rounded-md p-2"
+                                                    onValueChange={(value) => setData('contractor_name', value)}>
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Select a contractor" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {contractors.map((contractor) => (
+                                                            <SelectItem key={contractor.id}
+                                                                        value={contractor.id + ' - ' + contractor.name + ' - ' + contractor.email}>
+                                                                {contractor.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <Label htmlFor="quote-amount">Job amount</Label>
+                                                <Input
+                                                    id="quote-amount"
+                                                    type={'text'}
+                                                    placeholder="Enter Job Amount"
+                                                    value={data.total.toFixed(2)}
+                                                    onChange={(e) => setData('job_price', e.target.value)}
+                                                />
+                                                <div className="flex justify-end gap-2">
+                                                    <Button variant="outline">
+                                                        <Link href={'/bookings'}>Cancel</Link>
+                                                    </Button>
+                                                    <Button type={'submit'} disabled={data.contractor_name === ''}>Send
+                                                        Price to Jobber</Button>
+                                                </div>
+                                            </form>
+                                        </CardContent>
+                                    </Card>
+                                </>
+                            )}
                         </>
                     )}
                     <Timeline quotes={price} />
@@ -296,7 +370,7 @@ const KeyValueList = ({ items }: { items: { key: string; value: React.ReactNode 
     </ul>
 );
 
-export function JobDetailsCard({ job, approved }) {
+export function JobDetailsCard({ job, approved, asignedContractor }) {
     const { client, service_request } = job;
     return (
         <Card className="w-full">
@@ -317,14 +391,13 @@ export function JobDetailsCard({ job, approved }) {
                         <Badge
                             className="text-sm">{service_request.status.charAt(0).toUpperCase() + service_request.status.slice(1)}</Badge>
                     </div>
-                    {approved && (
-                        <div>
-                            <h3 className="font-medium text-lg mb-2 flex items-center gap-1"><Hammer />Jobber ETA</h3>
-                            <Link href={`/jobs/${job.id}/start`} className="flex items-center gap-1">
-                                <Button>Arived</Button>
-                            </Link>
-                        </div>
-                    )}
+                    <div>
+                        <h3 className="font-medium text-lg mb-2 flex items-center gap-1">
+                            <GitCommitVertical /> Job Status
+                        </h3>
+                        <Badge
+                            className="text-sm">{job.status.charAt(0).toUpperCase() + job.status.slice(1)}</Badge>
+                    </div>
                 </div>
 
                 <div className={'w-[280px]'}>
@@ -344,6 +417,34 @@ export function JobDetailsCard({ job, approved }) {
                             ]}
                         />
                     </div>
+
+                    {asignedContractor && (
+                        <>
+                            <Separator className={'mt-5 mb-5'} />
+
+                            <h3 className="font-medium text-lg mb-2 flex items-center gap-1"><Pickaxe /> Contractor Info
+                            </h3>
+
+                            <div className="space-y-4">
+                                <KeyValueList
+                                    items={[
+                                        {
+                                            key: 'Asigned to: ',
+                                            value: asignedContractor.name
+                                        },
+                                        {
+                                            key: 'Phone: ',
+                                            value: asignedContractor.user_detail.phone
+                                        },
+                                        {
+                                            key: 'Email: ',
+                                            value: asignedContractor.email
+                                        }
+                                    ]}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div>

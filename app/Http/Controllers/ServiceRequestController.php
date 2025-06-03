@@ -70,7 +70,7 @@ class ServiceRequestController extends Controller
                     ]);
                     break;
                 case 'All Requests':
-                    $query->all();
+                    $query->latest();
                     break;
                 // Add other custom filter cases as needed
             }
@@ -148,14 +148,23 @@ class ServiceRequestController extends Controller
         $services = Service::all();
 
         // check approved quotes is pending
-        if ($quotes)
+        if ($quotes) {
             $approvedQuotes = $quotes->first()?->is_approved == true;
+        }
+
+        $checkQuotePending = false;
+        if ($quotes->count() === 0) {
+            $checkQuotePending = true;
+        } else {
+            $checkQuotePending = ($quotes->first()?->is_approved || $quotes->first()?->is_rejected) ? true : false;
+        }
 
         return Inertia::render('Requests/Show', [
             'request' => $serviceRequest,
             'quotes' => $quotes,
             'approvedQuotes' => $approvedQuotes,
             'services' => $services,
+            'checkQuotePending' => $checkQuotePending,
         ]);
     }
 
@@ -335,7 +344,7 @@ class ServiceRequestController extends Controller
     public function checkout(Request $request, $id)
     {
         $service = ServiceRequest::where('id', $id)->first();
-        
+
         if(isset($service->deposit_amount) && $service->deposit_amount > 0)
             $unit_amount = intval(round(floatval($service->deposit_amount) * 100)); // convert to integer cents
         else
@@ -359,6 +368,13 @@ class ServiceRequestController extends Controller
             'success_url' => route('payment.success'),
             'cancel_url' => route('payment.cancel'),
         ]);
+
+        // Update the service request with the Stripe session ID
+        if ($session)
+            $service->update([
+                'is_paid' => true, // Set to false initially
+                'paid_at' => Carbon::now(), // Set to null initially
+            ]);
 
         return Inertia::location($session->url);
     }

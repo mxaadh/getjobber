@@ -19,7 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
-export default function Index({ users, employee_count, contractor_count, client_count, searchQuery }) {
+export default function Index({ users, employee_count, contractor_count, admin_count, all_count, searchQuery }) {
     const { data, setData, get } = useForm({
         search: searchQuery || ''
     });
@@ -58,9 +58,13 @@ export default function Index({ users, employee_count, contractor_count, client_
                             value: contractor_count
                         },
                         {
-                            title: 'Clients',
-                            value: client_count
+                            title: 'Admins',
+                            value: admin_count
                         },
+                        {
+                            title: 'All Users',
+                            value: all_count
+                        }
                     ]}
                 />
 
@@ -70,33 +74,7 @@ export default function Index({ users, employee_count, contractor_count, client_
                         <CardDescription>{users.total} results</CardDescription>
                         {/* Filters and Search */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                            <div className="flex gap-2 w-full md:w-auto">
-                                {/*<DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="flex gap-2">
-                                            <Filter className="h-4 w-4" />
-                                            Role
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56">
-                                        <DropdownMenuCheckboxItem checked>
-                                            All
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem>
-                                            Admin
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem>
-                                            Employee
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem>
-                                            Contractor
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem>
-                                            Client
-                                        </DropdownMenuCheckboxItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>*/}
-                            </div>
+                            <div className="flex gap-2 w-full md:w-auto"></div>
                             <SearchInput
                                 searchValue={data.search}
                                 onSearchChange={(value) => setData('search', value)}
@@ -128,7 +106,9 @@ export default function Index({ users, employee_count, contractor_count, client_
                                                     <Edit className={'text-yellow-800'} />
                                                 </Button>
                                             </Link>
-                                            <DeleteEntityDialog url={`/users/${user.id}`}  />
+                                            {user.email !== 'admin@gmail.com' && (
+                                                <DeleteEntityDialog url={`/users/${user.id}`} />
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}

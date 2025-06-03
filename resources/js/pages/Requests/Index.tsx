@@ -63,7 +63,7 @@ export default function Index({
                 </PageHeadingButtons>
 
                 <StatsOverview
-                    route={'requests.index'}
+                    _route={'requests.index'}
                     stats={[
                         {
                             title: 'Approved Requests',

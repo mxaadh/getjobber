@@ -36,8 +36,14 @@ export default function DeleteEntityDialog({ url }: { url: string }) {
                     <AlertDialogAction
                         className="bg-red-600 text-white hover:bg-red-700"
                         onClick={() => router.delete(url, {
-                            onSuccess: () => toast.success(flash?.success || 'Record deleted successfully.'),
-                            onError: () => toast.error(flash?.error || 'Failed to delete the record.')
+                            onSuccess: () => {
+                                if (flash?.success)
+                                    toast.success(flash.success);
+                                else if (flash?.error)
+                                    toast.error(flash.error);
+                                else
+                                    toast.success('Record deleted successfully.');
+                            }
                         })}
                     >
                         Delete

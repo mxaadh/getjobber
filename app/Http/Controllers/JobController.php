@@ -27,28 +27,54 @@ class JobController extends Controller
             $query = $query->where('contractor_id', Auth::id());
         }
 
-        $all_count = Job::count();
-        $approved_count = Job::where('status', Job::STATUS_APPROVED)->count();
-        $pending_count = Job::whereNot('status', Job::STATUS_APPROVED)->count();
-        $month_count = Job::whereBetween('created_at', [
-            Carbon::now()->startOfMonth(), // 1st day of month
-            Carbon::now() // current time
-        ])->count();
-        $week_count = Job::whereBetween('created_at', [
-            Carbon::now()->startOfWeek(), // Monday
-            Carbon::now() // current time
-        ])->count();
-
         $jobs = $query->paginate(10);
 
         return Inertia::render('Jobs/Index', [
             'jobs' => $jobs,
-            'all_count' => $all_count,
-            'approved_count' => $approved_count,
-            'pending_count' => $pending_count,
-            'month_count' => $month_count,
-            'week_count' => $week_count,
+            'all_count' => $this->stats()['all'] ?? 0,
+            'approved_count' => $this->stats()['approved'] ?? 0,
+            'pending_count' => $this->stats()['pending'] ?? 0,
+            'month_count' => $this->stats()['month'] ?? 0,
+            'week_count' => $this->stats()['week'] ?? 0,
         ]);
+    }
+
+
+    public function stats()
+    {
+        $data = [];
+        $data['all'] = Job::count();
+        $data['approved'] = Job::where('status', Job::STATUS_APPROVED)->count();
+        $data['pending'] = Job::whereNot('status', Job::STATUS_APPROVED)->count();
+        $data['month'] = Job::whereBetween('created_at', [
+            Carbon::now()->startOfMonth(), // 1st day of month
+            Carbon::now() // current time
+        ])->count();
+        $data['week'] = Job::whereBetween('created_at', [
+            Carbon::now()->startOfWeek(), // Monday
+            Carbon::now() // current time
+        ])->count();
+
+        $contractor_id = 0;
+        if (Auth::user()->isContractor()) {
+            $contractor_id = Auth::user()->id ?? 0;
+        }
+
+        if ($contractor_id > 0) {
+            $data['all'] = Job::where('contractor_id', $contractor_id)->count();
+            $data['approved'] = Job::where('contractor_id', $contractor_id)->where('status', Job::STATUS_APPROVED)->count();
+            $data['pending'] = Job::where('contractor_id', $contractor_id)->whereNot('status', Job::STATUS_APPROVED)->count();
+            $data['month'] = Job::where('contractor_id', $contractor_id)->whereBetween('created_at', [
+                Carbon::now()->startOfMonth(), // 1st day of month
+                Carbon::now() // current time
+            ])->count();
+            $data['week'] = Job::where('contractor_id', $contractor_id)->whereBetween('created_at', [
+                Carbon::now()->startOfWeek(), // Monday
+                Carbon::now() // current time
+            ])->count();
+        }
+
+        return $data;
     }
 
     public function create()

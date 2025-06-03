@@ -66,6 +66,7 @@ export default function Index({ records, searchQuery }) {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Title</TableHead>
+                                    <TableHead>Type</TableHead>
                                     <TableHead>Description</TableHead>
                                     <TableHead>Unit Price</TableHead>
                                     <TableHead>Created Date</TableHead>
@@ -76,6 +77,7 @@ export default function Index({ records, searchQuery }) {
                                 {records.data.map((record) => (
                                     <TableRow key={record.id}>
                                         <TableCell>{record.title}</TableCell>
+                                        <TableCell>{record.type}</TableCell>
                                         <TableCell>{record.description}</TableCell>
                                         <TableCell>{record.unit_price}</TableCell>
                                         <TableCell>{format(new Date(record.created_at), 'dd/MM/yyyy')}</TableCell>

@@ -5,8 +5,15 @@ import PageHeadingButtons from '@/components/page-heading-buttons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { countries } from '@/lib/utils';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import React from 'react';
@@ -27,7 +34,8 @@ export default function Create() {
     const { data, setData, post, errors, reset, processing } = useForm({
         title: '',
         description: '',
-        unit_price: ''
+        unit_price: '',
+        type: ''
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -70,6 +78,24 @@ export default function Create() {
                                 />
                                 {errors.description &&
                                     <div className="text-red-500 text-xs">{errors.description}</div>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="type">Type</Label>
+                                <Select onValueChange={(value) => setData('type', value)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select a Type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Type</SelectLabel>
+                                            <SelectItem value="client">Client</SelectItem>
+                                            <SelectItem value="contractor">Contractor</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                {errors.type &&
+                                    <div className="text-red-500 text-xs">{errors.type}</div>}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="title">Unit</Label>

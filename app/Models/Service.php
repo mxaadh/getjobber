@@ -9,6 +9,7 @@ class Service extends Model
     protected $fillable = [
         'title',
         'description',
+        'type',
         'unit_price',
     ];
 }

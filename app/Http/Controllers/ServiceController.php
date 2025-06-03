@@ -48,6 +48,7 @@ class ServiceController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'type' => 'required|string|max:255',
             'unit_price' => 'required|numeric|min:0',
         ]);
 

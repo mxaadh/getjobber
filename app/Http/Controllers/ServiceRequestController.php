@@ -32,19 +32,6 @@ class ServiceRequestController extends Controller
             $query = $query->where('client_id', $client->id);
         }
 
-        $requests_count = ServiceRequest::count();
-        $requests_approved_count = ServiceRequest::where('status', ServiceRequest::STATUS_APPROVED)->count();
-        $requests_unapproved_count = ServiceRequest::whereNot('status', ServiceRequest::STATUS_APPROVED)->count();
-        $requests_count = ServiceRequest::count();
-        $requests_count_month = ServiceRequest::whereBetween('created_at', [
-            Carbon::now()->startOfMonth(), // 1st day of month
-            Carbon::now() // current time
-        ])->count();
-        $requests_count_week = ServiceRequest::whereBetween('created_at', [
-            Carbon::now()->startOfWeek(), // Monday
-            Carbon::now() // current time
-        ])->count();
-
         // Filter functionality
         if ($request->has('filter') && !empty($request->filter)) {
             // Handle custom filters or fallback
@@ -80,12 +67,49 @@ class ServiceRequestController extends Controller
 
         return Inertia::render('Requests/Index')->with([
             'requests' => $requests,
-            'requests_count' => $requests_count,
-            'requests_approved_count' => $requests_approved_count,
-            'requests_unapproved_count' => $requests_unapproved_count,
-            'requests_count_month' => $requests_count_month,
-            'requests_count_week' => $requests_count_week,
+            'requests_count' => $this->stats()['count'] ?? 0,
+            'requests_approved_count' => $this->stats()['approved_count'] ?? 0,
+            'requests_unapproved_count' => $this->stats()['unapproved_count'] ?? 0,
+            'requests_count_month' => $this->stats()['month_count'] ?? 0,
+            'requests_count_week' => $this->stats()['week_count'] ?? 0,
         ]);
+    }
+
+    public function stats()
+    {
+        $data = [];
+        $data['count'] = ServiceRequest::count();
+        $data['approved_count'] = ServiceRequest::where('status', ServiceRequest::STATUS_APPROVED)->count();
+        $data['unapproved_count'] = ServiceRequest::whereNot('status', ServiceRequest::STATUS_APPROVED)->count();
+        $data['month_count'] = ServiceRequest::whereBetween('created_at', [
+            Carbon::now()->startOfMonth(), // 1st day of month
+            Carbon::now() // current time
+        ])->count();
+        $data['week_count'] = ServiceRequest::whereBetween('created_at', [
+            Carbon::now()->startOfWeek(), // Monday
+            Carbon::now() // current time
+        ])->count();
+
+        $client_id = 0;
+        if (Auth::user()->isClient()) {
+            $client_id = Client::where('email', Auth::user()->email)->first()->id ?? 0;
+        }
+
+        if ($client_id > 0) {
+            $data['count'] = ServiceRequest::where('client_id', $client_id)->count();
+            $data['approved_count'] = ServiceRequest::where('client_id', $client_id)->where('status', ServiceRequest::STATUS_APPROVED)->count();
+            $data['unapproved_count'] = ServiceRequest::where('client_id', $client_id)->whereNot('status', ServiceRequest::STATUS_APPROVED)->count();
+            $data['month_count'] = ServiceRequest::where('client_id', $client_id)->whereBetween('created_at', [
+                Carbon::now()->startOfMonth(), // 1st day of month
+                Carbon::now() // current time
+            ])->count();
+            $data['week_count'] = ServiceRequest::where('client_id', $client_id)->whereBetween('created_at', [
+                Carbon::now()->startOfWeek(), // Monday
+                Carbon::now() // current time
+            ])->count();
+        }
+
+        return $data;
     }
 
     /**
@@ -345,7 +369,7 @@ class ServiceRequestController extends Controller
     {
         $service = ServiceRequest::where('id', $id)->first();
 
-        if(isset($service->deposit_amount) && $service->deposit_amount > 0)
+        if (isset($service->deposit_amount) && $service->deposit_amount > 0)
             $unit_amount = intval(round(floatval($service->deposit_amount) * 100)); // convert to integer cents
         else
             $unit_amount = intval(round(floatval($service->quote_amount) * 100)); // convert to integer cents

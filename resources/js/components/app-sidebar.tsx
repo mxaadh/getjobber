@@ -69,7 +69,7 @@ export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const { role } = auth.user;
 
-    console.log(role, "<< role");
+    // console.log(role, "<< role");
 
     if (role == 'client') {
         midNavItems = [

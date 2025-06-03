@@ -137,18 +137,10 @@ class UserController extends Controller
         // Update or create user details
         if ($user->userDetail) {
             $user->userDetail->update([
-                'phone' => $validated['phone'] ?? null,
-                'country' => $validated['country'] ?? null,
-                'state' => $validated['state'] ?? null,
-                'city' => $validated['city'] ?? null,
-            ]);
-        } else {
-            UserDetail::create([
-                'user_id' => $user->id,
-                'phone' => $validated['phone'] ?? null,
-                'country' => $validated['country'] ?? null,
-                'state' => $validated['state'] ?? null,
-                'city' => $validated['city'] ?? null,
+                'phone' => $request->get('phone') ?? null,
+                'country' => $request->get('country') ?? null,
+                'state' => $request->get('state') ?? null,
+                'city' => $request->get('city') ?? null,
             ]);
         }
 

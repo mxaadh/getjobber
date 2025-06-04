@@ -242,6 +242,7 @@ class ServiceRequestController extends Controller
             'tax' => 'nullable|numeric',
             'total' => 'required|numeric',
             'deposit_required' => 'nullable|numeric',
+            'deposit_required_amount' => 'nullable|numeric',
             'description' => 'nullable|string',
         ]);
 
@@ -252,7 +253,7 @@ class ServiceRequestController extends Controller
             $serviceRequest->update([
                 'status' => ServiceRequest::STATUS_ACTIVE,
                 'quote_amount' => $validated['total'],
-                'deposit_amount' => $validated['deposit_required'] ?? 0,
+                'deposit_amount' => $validated['deposit_required_amount'] ?? 0,
             ]);
 
             $quote = BookingQuote::create([
@@ -285,7 +286,7 @@ class ServiceRequestController extends Controller
                 'subtotal' => $validated['subtotal'],
                 'discount' => $validated['discount'] ?? 0,
                 'tax' => $validated['tax'] ?? 0,
-                'deposit_required' => $validated['deposit_required'] ?? 0,
+                'deposit_required_amount' => $validated['deposit_required_amount'] ?? 0,
                 'date_of_issue' => $quote->created_at->format('F j, Y'),
             ];
 

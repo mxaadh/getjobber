@@ -33,6 +33,16 @@ import { SharedData } from '@/types';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui/table';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Requests', href: '/requests' },
@@ -70,11 +80,12 @@ export default function Show({ request, quotes, approvedQuotes, services, checkQ
         items: initialItems,
         subtotal: 0,
         discount: 0,
-        tax_rate: 10,
+        tax_rate: 0,
         tax: 0,
         total: 0,
         deposit_required: 0,
-        deposit_required_amount: 1
+        deposit_required_percentage: 0,
+        deposit_required_amount: 0
     });
     const [showDiscoutn, setShowDiscount] = React.useState(false);
     const [addTax, setAddTax] = React.useState(false);
@@ -200,6 +211,7 @@ export default function Show({ request, quotes, approvedQuotes, services, checkQ
                                                         <div className="col-span-5 space-y-2">
                                                             <Label>Product</Label>
                                                             <Select
+                                                                value={item.name}
                                                                 onValueChange={(value) => handleSelectValueChange(value, index)}>
                                                                 <SelectTrigger><SelectValue
                                                                     placeholder="Select a service" /></SelectTrigger>
@@ -208,7 +220,7 @@ export default function Show({ request, quotes, approvedQuotes, services, checkQ
                                                                         <SelectLabel>Service</SelectLabel>
                                                                         {services.map((service) => (
                                                                             <SelectItem key={service.id}
-                                                                                        value={service.id.toString()}>
+                                                                                        value={service.title}>
                                                                                 {service.title}
                                                                             </SelectItem>
                                                                         ))}
@@ -251,85 +263,97 @@ export default function Show({ request, quotes, approvedQuotes, services, checkQ
                                     <Card>
                                         <CardHeader><CardTitle>Quote Summary</CardTitle></CardHeader>
                                         <CardContent className="grid gap-2">
-                                            <div className="flex justify-between">
-                                                <span>Subtotal</span>
-                                                <span>${data.subtotal.toFixed(2)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center space-y-5">
-                                                <span>Discount</span>
-                                                {showDiscoutn && (
-                                                    <Input type="number" className="w-24" value={data.discount}
-                                                           min={0}
-                                                           onChange={handleDiscountChange} />
-                                                )}
-                                                <div className="flex items-center gap-2">
-                                                    {showDiscoutn ? (
-                                                        <span>
-                                                            <Button size="icon" variant="ghost"
+                                            <Table>
+                                                <TableBody>
+                                                    <TableRow>
+                                                        <TableCell
+                                                            className="font-medium"><span>Subtotal</span></TableCell>
+                                                        <TableCell></TableCell>
+                                                        <TableCell className="text-right">
+                                                            <span>${data.subtotal.toFixed(2)}</span>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                    <TableRow>
+                                                        <TableCell
+                                                            className="font-medium"><span>Discount</span></TableCell>
+                                                        <TableCell>{showDiscoutn && (
+                                                            <Input type="number"
+                                                                   className="w-24"
+                                                                   value={data.discount}
+                                                                   min={0}
+                                                                   onChange={handleDiscountChange}
+                                                            />
+                                                        )}</TableCell>
+                                                        <TableCell className="text-right">{showDiscoutn ? (
+                                                            <span>
+                                                                <Button size="icon" variant="ghost"
+                                                                        onClick={() => {
+                                                                            setShowDiscount(false);
+                                                                            recalculate(data.items, 0);
+                                                                        }}>
+                                                                    <Trash
+                                                                        className="text-red-800" />
+                                                                </Button>
+                                                                <span>-${data.discount.toFixed(2)}</span>
+                                                            </span>
+                                                        ) : (
+                                                            <b onClick={() => setShowDiscount(true)}
+                                                               className={'cursor-pointer'}>Add
+                                                                Discount</b>
+                                                        )}</TableCell>
+                                                    </TableRow>
+                                                    <TableRow>
+                                                        <TableCell
+                                                            className="font-medium"><span>Tax (%)</span></TableCell>
+                                                        <TableCell>
+                                                            {addTax && (
+                                                                <Input
+                                                                    className="w-24"
+                                                                    type="number"
+                                                                    min={1}
+                                                                    max={100}
+                                                                    value={data.tax_rate}
+                                                                    onChange={(e) => {
+                                                                        const newRate = parseFloat(e.target.value) || 0;
+                                                                        setData(prev => ({
+                                                                            ...prev,
+                                                                            tax_rate: newRate
+                                                                        }));
+                                                                        recalculate(data.items, data.discount);
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            {addTax ? (
+                                                                <span>
+                                                                    <Button size="icon" variant="ghost"
+                                                                            onClick={() => {
+                                                                                setAddTax(false);
+                                                                                setData(prev => ({
+                                                                                    ...prev,
+                                                                                    tax_rate: 0
+                                                                                }));
+                                                                                recalculate(data.items, data.discount);
+                                                                            }}>
+                                                                        <Trash className="text-red-800" />
+                                                                    </Button>
+                                                                  <span>${data.tax.toFixed(2)}</span>
+                                                                </span>
+                                                            ) : (
+                                                                <b
                                                                     onClick={() => {
-                                                                        setShowDiscount(false);
-                                                                        recalculate(data.items, 0);
-                                                                    }}>
-                                                                <Trash
-                                                                    className="text-red-800" />
-                                                            </Button>
-                                                            <span>-${data.discount.toFixed(2)}</span>
-                                                        </span>
-                                                    ) : (
-                                                        <b onClick={() => setShowDiscount(true)}
-                                                           className={'cursor-pointer'}>Add
-                                                            Discount</b>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span>Tax</span>
-
-                                                {addTax && (
-                                                    <div className={'flex justify-between align-middle gap-5 w-32'}>
-                                                        <Input
-                                                            className="w-24"
-                                                            type="number"
-                                                            min={0}
-                                                            value={data.tax_rate}
-                                                            onChange={(e) => {
-                                                                const newRate = parseFloat(e.target.value) || 0;
-                                                                setData(prev => ({ ...prev, tax_rate: newRate }));
-                                                                recalculate(data.items, data.discount);
-                                                            }}
-                                                        />
-                                                        %
-                                                    </div>
-                                                )}
-
-                                                {addTax ? (
-                                                    <span className="flex items-center gap-2">
-                                                      <Button
-                                                          size="icon"
-                                                          variant="ghost"
-                                                          onClick={() => {
-                                                              setAddTax(false);
-                                                              setData(prev => ({ ...prev, tax_rate: 0 }));
-                                                              recalculate(data.items, data.discount);
-                                                          }}
-                                                      >
-                                                        <Trash className="text-red-800" />
-                                                      </Button>
-                                                      <span>${data.tax.toFixed(2)}</span>
-                                                    </span>
-                                                ) : (
-                                                    <b
-                                                        onClick={() => {
-                                                            setAddTax(true);
-                                                            setData(prev => ({ ...prev, tax_rate: 10 })); // Default to 10% when enabling
-                                                            recalculate(data.items, data.discount);
-                                                        }}
-                                                        className="cursor-pointer"
-                                                    >
-                                                        Add Tax
-                                                    </b>
-                                                )}
-                                            </div>
+                                                                        setAddTax(true);
+                                                                        setData(prev => ({ ...prev, tax_rate: 10 })); // Default to 10% when enabling
+                                                                        recalculate(data.items, data.discount);
+                                                                    }}
+                                                                    className="cursor-pointer"
+                                                                >Add Tax</b>
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                </TableBody>
+                                            </Table>
 
                                             <Separator />
                                             <div className="flex justify-between font-bold">
@@ -346,25 +370,57 @@ export default function Show({ request, quotes, approvedQuotes, services, checkQ
                                                         onCheckedChange={(checked) => handleCheckedChange(!!checked)}
                                                     />
                                                     <Label htmlFor="deposit">
-                                                        Required deposit
+                                                        Required deposit (%)
                                                     </Label>
                                                 </div>
 
-                                                {data.deposit_required && (
+                                                {(data.deposit_required !== 0) && (
                                                     <div className={'flex items-center gap-2'}>
                                                         <Input
                                                             type="number"
                                                             className="w-24"
-                                                            min={0}
-                                                            value={data.deposit_required_amount}
+                                                            min={1}
+                                                            max={100}
+                                                            value={data.deposit_required_percentage || ''}
                                                             onChange={(e) => {
-                                                                console.log(e.target.value, "<< value");
+                                                                let value = parseFloat(e.target.value);
+                                                                // Handle NaN cases when input is empty
+                                                                if (isNaN(value)) {
+                                                                    value = 0;
+                                                                }
+                                                                // Ensure value stays within bounds
+                                                                value = Math.max(1, Math.min(100, value));
+
+                                                                setData(prev => ({
+                                                                    ...prev,
+                                                                    deposit_required_percentage: value,
+                                                                    deposit_required_amount: data.total * (value/100)
+                                                                }));
                                                             }}
                                                         />
-                                                        %
-                                                        <span>${(data.deposit_required || data.total * data.deposit_required_amount).toFixed(2)}</span>
                                                     </div>
                                                 )}
+                                                <div className={'flex items-center gap-2'}>
+                                                    <span className="font-medium">
+                                                        ${data.deposit_required_amount.toFixed(2)}
+                                                    </span>
+                                                </div>
+                                                {/*
+                                                    <div className={'flex items-center gap-2'}>
+                                                        <Input
+                                                            className="w-24"
+                                                            min={1}
+                                                            max={100}
+                                                            value={data.deposit_required_amount}
+                                                            onChange={(e) => {
+                                                                console.log(e.target.value, '<< value');
+                                                            }}
+                                                        />
+                                                        <span>{data.deposit_required_amount}</span>
+
+                                                        <span>${(data.deposit_required || data.total * data.deposit_required_amount).toFixed(2)}</span>
+                                                    </div>
+                                                )}*/}
 
                                             </div>
 

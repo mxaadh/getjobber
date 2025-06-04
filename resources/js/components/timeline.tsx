@@ -140,7 +140,7 @@ export function BookingTimeline({ quotes, deposit }) {
                                                 <Button>
                                                     <Link href={`/requests/checkout/${quote.booking_id}/`}
                                                           className="flex items-center gap-1 m-2">
-                                                        <ExternalLink /> Pay Now
+                                                        <ExternalLink /> Deposit Now
                                                     </Link>
                                                 </Button>
                                             </div>

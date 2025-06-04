@@ -19,12 +19,43 @@ use Auth;
 
 class JobController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $query = Job::with('client')->latest();
 
         if (Auth::user()->isContractor()) {
             $query = $query->where('contractor_id', Auth::id());
+        }
+
+        // Filter functionality
+        if ($request->has('filter') && !empty($request->filter)) {
+            // Handle custom filters or fallback
+            switch ($request->filter) {
+                case 'Approved Jobs':
+                    $query->where('status', Job::STATUS_APPROVED);
+                    break;
+                case 'Pending Jobs':
+                    // Special case where status is not approved
+                    $query->whereNot('status', Job::STATUS_APPROVED);
+                    break;
+                case 'Weekly Jobs':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfWeek(), // Monday
+                        Carbon::now() // current time
+                    ]);
+                    break;
+                case 'Monthly Jobs':
+                    // Special case where status is not approved
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth(), // 1st day of month
+                        Carbon::now() // current time
+                    ]);
+                    break;
+                case 'All Jobs':
+                    $query->latest();
+                    break;
+                // Add other custom filter cases as needed
+            }
         }
 
         $jobs = $query->paginate(10);

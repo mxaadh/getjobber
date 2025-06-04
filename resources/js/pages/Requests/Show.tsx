@@ -35,8 +35,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Bookings', href: '/requests' },
-    { title: 'Booking Detail', href: '#' }
+    { title: 'Requests', href: '/requests' },
+    { title: 'Request Detail', href: '#' }
 ];
 
 export default function Show({ request, quotes, approvedQuotes, services, checkQuotePending }: {
@@ -432,8 +432,8 @@ export default function Show({ request, quotes, approvedQuotes, services, checkQ
                             </div>
                         </div>
                     )}
-                    <BookingTimeline quotes={quotes} deposit={request.deposit_amount} />
                 </div>
+                <BookingTimeline quotes={quotes} deposit={request.deposit_amount} />
             </div>
         </AppLayout>
     );
